@@ -1,9 +1,10 @@
 '''
 ==========
 Date: June 15, 2022
-Maintantainer: Xinyi Zhong (xinyi.zhong@yale.edu)
-Xinchen Du: (xinchen.du@yale.edu)
-Zhiyuan Long: (zhiyuan.long@yale.edu)
+Maintantainer:
+Xinyi Zhong (xinyi.zhong@yale.edu)
+Xinchen Du (xinchen.du@yale.edu)
+Zhiyuan Long (zhiyuan.long@yale.edu)
 ==========
 Encapsulate dictlearner and neurodynamics to form a wave object
 '''
