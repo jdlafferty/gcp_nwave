@@ -1,7 +1,9 @@
 '''
 ==========
-Date: Thu Apr 14
+Date: June 15, 2022
 Maintantainer: Xinyi Zhong (xinyi.zhong@yale.edu)
+Xinchen Du: (xinchen.du@yale.edu)
+Zhiyuan Long: (zhiyuan.long@yale.edu)
 ==========
 Config class and CLI to set config
 '''
@@ -15,11 +17,11 @@ class KernelConfig:
     re : int = 3
     wi : int = 5
     we : int = 30
+    leaky: int = wi + we
 
 @dataclass
 class NDMConfig:
-    a: int = 1 
-    b: int = 1
+    pass
 
 
 @dataclass
@@ -28,9 +30,14 @@ class ExperimentConfig:
     ndm_name : str = "l1ActDoubleDecker"
     dl_name : str = "gradientDescent"
     input_dim : int = 97 
-    neuron_shape : tuple = (20,20)
-    train_steps : int = 1000
+    neuron_shape : tuple = (40,40)
+    gradient_steps : int = 30000
     batch_size : int = 256
+        
+    lr_act : float = 0.01
+    lr_codebook: float = 0.01
+    l1_target : float = 0.2
+    threshold: float = 0.01
 
 
 @dataclass
@@ -40,9 +47,6 @@ class Config:
     exp : ExperimentConfig = ExperimentConfig()
     srepr : str = MISSING
 
+
 srepr = "test"
-cfg = OmegaConf.structured(Config(srepr=srepr))
-cfg.kernel.we = 3
-print(OmegaConf.to_yaml(cfg))
-
-
+cfg = Config(srepr = srepr)

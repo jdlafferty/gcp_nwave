@@ -10,9 +10,10 @@ Maintantainer: Xinyi Zhong (xinyi.zhong@yale.edu)
 # Create kernel
 #################################
 
-import cupy as cp
+#import cupy as cp
+import numpy as cp
 
-def get_kernels(re, ri, wi=3, we=2, sigmaE = 2):
+def get_kernels(re, ri, wi=5, we=30, sigmaE = 3):
     k_exc = cp.zeros([2*re+1, 2*re+1])
     k_inh = cp.zeros([2*ri+1, 2*ri+1])
     for i in range(2*re+1):
