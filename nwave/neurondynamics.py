@@ -1,7 +1,7 @@
 '''
 ==========
 Date: June 15, 2022
-Maintantainer:
+Maintainer:
 Xinyi Zhong (xinyi.zhong@yale.edu)
 Xinchen Du (xinchen.du@yale.edu)
 Zhiyuan Long (zhiyuan.long@yale.edu)
@@ -109,7 +109,7 @@ class L1ActDoubleDecker(_NeuronDynamicsModel):
     inh_act
     '''
     
-    def __init__(self, neuron_shape, leaky, exck, inhk, lr_act, l1_target, threshold, bs = 256) -> None:
+    def __init__(self, neuron_shape, leaky, exck, inhk, lr_act, l0_target, threshold, bs = 256) -> None:
         assert len(neuron_shape) == 2 
 
         self.neuron_shape = neuron_shape
@@ -120,7 +120,7 @@ class L1ActDoubleDecker(_NeuronDynamicsModel):
         self.exck = cp.expand_dims(cp.asarray(exck), axis = 0)
         self.inhk = cp.expand_dims(cp.asarray(inhk), axis = 0)
         self.lr_act = cp.asarray(lr_act)
-        self.l1_target = cp.asarray(l1_target)
+        self.l0_target = cp.asarray(l0_target)
         self.leaky = cp.asarray(leaky)
         self.max_act_fit = cp.asarray(50)
         self.threshold = threshold
@@ -168,7 +168,7 @@ class L1ActDoubleDecker(_NeuronDynamicsModel):
         self.inh_act = cp.maximum(self.inh_act - self.threshold, 0) - cp.maximum(-self.inh_act - self.threshold, 0)
 
     def evolve(self):
-        dthreshold = cp.mean((cp.abs(self.exc_act) > 1e-4)) - self.l1_target
+        dthreshold = cp.mean((cp.abs(self.exc_act) > 1e-4)) - self.l0_target
         self.threshold += .01 * dthreshold
 
     def dump(self, fpath):

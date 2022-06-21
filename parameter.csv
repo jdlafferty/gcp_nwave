@@ -1,0 +1,2 @@
+ri,re,wi,we,neuron_shape,gradient_steps,batch_size,lr_act,lr_codebook,l0_target,threshold
+5,3,5,30,1600,30000,256,0.01,0.01,0.2,0.01

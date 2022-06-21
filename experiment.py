@@ -1,7 +1,7 @@
 '''
 ==========
 Date: June 15, 2022
-Maintantainer:
+Maintainer:
 Xinyi Zhong (xinyi.zhong@yale.edu)
 Xinchen Du (xinchen.du@yale.edu)
 Zhiyuan Long (zhiyuan.long@yale.edu)
@@ -46,7 +46,7 @@ fpath = "result"
 loader = Loader(cfg.exp.batch_size)
 dl = DL(input_dim = cfg.exp.input_dim, neuron_shape = cfg.exp.neuron_shape, lr_codebook = cfg.exp.lr_codebook)
 ndm = NDM(neuron_shape = cfg.exp.neuron_shape, leaky = cfg.kernel.leaky, exck = k_exc, inhk = k_inh,
-         lr_act = cfg.exp.lr_act, l1_target = cfg.exp.l1_target, threshold = cfg.exp.threshold)
+         lr_act = cfg.exp.lr_act, l0_target = cfg.exp.l0_target, threshold = cfg.exp.threshold)
 
 wave = wave.Wave(dl, ndm)
 

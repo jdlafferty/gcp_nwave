@@ -1,7 +1,7 @@
 '''
 ==========
-Date: June 15, 2022
-Maintantainer:
+Date: June 20, 2022
+Maintainer:
 Xinyi Zhong (xinyi.zhong@yale.edu)
 Xinchen Du (xinchen.du@yale.edu)
 Zhiyuan Long (zhiyuan.long@yale.edu)
@@ -12,12 +12,33 @@ from dataclasses import dataclass
 
 from omegaconf import OmegaConf, MISSING
 
+from csv import DictReader
+
+import math
+
+params = []
+with open('parameter.csv', 'r') as read_obj:
+    # pass the file object to DictReader() to get the DictReader object
+    csv_dict_reader = DictReader(read_obj)
+    # iterate over each line as a ordered dictionary
+    for row in csv_dict_reader:
+        # row variable is a dictionary that represents a row in csv
+        params.append(row)
+
+# trial 1, only one row of params
+param = params[0]
+
+def get_neuron_shape(x):
+    y = int(math.sqrt(x))
+    return (y, y)
+
+
 @dataclass
 class KernelConfig:
-    ri : int = 5
-    re : int = 3
-    wi : int = 5
-    we : int = 30
+    ri : int = int(param['ri'])
+    re : int = int(param['re'])
+    wi : int = int(param['wi'])
+    we : int = int(param['we'])
     leaky: int = wi + we
 
 @dataclass
@@ -31,14 +52,14 @@ class ExperimentConfig:
     ndm_name : str = "l1ActDoubleDecker"
     dl_name : str = "gradientDescent"
     input_dim : int = 97 
-    neuron_shape : tuple = (40,40)
-    gradient_steps : int = 30000
-    batch_size : int = 256
+    neuron_shape : tuple = get_neuron_shape(int(param['neuron_shape']))
+    gradient_steps : int = int(param['gradient_steps'])
+    batch_size : int = int(param['batch_size'])
         
-    lr_act : float = 0.01
-    lr_codebook: float = 0.01
-    l1_target : float = 0.2
-    threshold: float = 0.01
+    lr_act : float = float(param['lr_act'])
+    lr_codebook: float = float(param['lr_codebook'])
+    l0_target : float = float(param['l0_target'])
+    threshold: float = float(param['threshold'])
 
 
 @dataclass

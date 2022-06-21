@@ -1,7 +1,7 @@
 '''
 ==========
 Date: June 15, 2022
-Maintantainer:
+Maintainer:
 Xinyi Zhong (xinyi.zhong@yale.edu)
 Xinchen Du (xinchen.du@yale.edu)
 Zhiyuan Long (zhiyuan.long@yale.edu)
@@ -122,7 +122,7 @@ if __name__ == "__main__":
 
     dl = DL(input_dim = cfg.exp.input_dim, neuron_shape = cfg.exp.neuron_shape, lr_codebook = cfg.exp.lr_codebook)
     ndm = NDM(neuron_shape = cfg.exp.neuron_shape, leaky = cfg.kernel.leaky, exck = k_exc, inhk = k_inh,
-         lr_act = cfg.exp.lr_act, l1_target = cfg.exp.l1_target, threshold = cfg.exp.threshold, bs = 97)
+         lr_act = cfg.exp.lr_act, l0_target = cfg.exp.l0_target, threshold = cfg.exp.threshold, bs = 97)
 
     batch = np.eye(emb_dim)
     batch = batch - np.mean(batch, axis=1)

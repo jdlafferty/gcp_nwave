@@ -1,7 +1,7 @@
 '''
 ==========
 Date: June 15, 2022
-Maintantainer:
+Maintainer:
 Xinyi Zhong (xinyi.zhong@yale.edu)
 Xinchen Du (xinchen.du@yale.edu)
 Zhiyuan Long (zhiyuan.long@yale.edu)
