@@ -1,6 +1,6 @@
 '''
 ==========
-Date: June 20, 2022
+Date: June 21, 2022
 Maintainer:
 Xinyi Zhong (xinyi.zhong@yale.edu)
 Xinchen Du (xinchen.du@yale.edu)
@@ -8,6 +8,7 @@ Zhiyuan Long (zhiyuan.long@yale.edu)
 ==========
 Config class and CLI to set config
 '''
+
 from dataclasses import dataclass
 
 from omegaconf import OmegaConf, MISSING
@@ -15,6 +16,15 @@ from omegaconf import OmegaConf, MISSING
 from csv import DictReader
 
 import math
+import argparse
+
+def parse_argv():
+    parser = argparse.ArgumentParser(prog='SC')
+    parser.add_argument("--row", type = int)
+    return parser.parse_args()
+
+args = parse_argv()
+
 
 params = []
 with open('parameter.csv', 'r') as read_obj:
@@ -25,8 +35,13 @@ with open('parameter.csv', 'r') as read_obj:
         # row variable is a dictionary that represents a row in csv
         params.append(row)
 
-# trial 1, only one row of params
-param = params[0]
+
+i = args.row
+param = params[i-1]
+
+def get_argsrow():
+    return i
+
 
 def get_neuron_shape(x):
     y = int(math.sqrt(x))
@@ -35,11 +50,13 @@ def get_neuron_shape(x):
 
 @dataclass
 class KernelConfig:
-    ri : int = int(param['ri'])
-    re : int = int(param['re'])
-    wi : int = int(param['wi'])
-    we : int = int(param['we'])
+    ri: int = int(param['ri'])
+    re: int = int(param['re'])
+    wi: int = int(param['wi'])
+    we: int = int(param['we'])
+
     leaky: int = wi + we
+
 
 @dataclass
 class NDMConfig:
@@ -48,27 +65,28 @@ class NDMConfig:
 
 @dataclass
 class ExperimentConfig:
-    loader_name : str = "unigram97"
-    ndm_name : str = "l1ActDoubleDecker"
-    dl_name : str = "gradientDescent"
-    input_dim : int = 97 
-    neuron_shape : tuple = get_neuron_shape(int(param['neuron_shape']))
-    gradient_steps : int = int(param['gradient_steps'])
-    batch_size : int = int(param['batch_size'])
-        
-    lr_act : float = float(param['lr_act'])
+    loader_name: str = "unigram97"
+    ndm_name: str = "l1ActDoubleDecker"
+    dl_name: str = "gradientDescent"
+    input_dim: int = 97
+    neuron_shape: tuple = get_neuron_shape(int(param['neuron_shape']))
+    gradient_steps: int = int(param['gradient_steps'])
+    batch_size: int = int(param['batch_size'])
+
+    lr_act: float = float(param['lr_act'])
     lr_codebook: float = float(param['lr_codebook'])
-    l0_target : float = float(param['l0_target'])
+    l0_target: float = float(param['l0_target'])
+
     threshold: float = float(param['threshold'])
 
 
 @dataclass
 class Config:
-    kernel :  KernelConfig = KernelConfig()
-    ndm : NDMConfig =  NDMConfig()
-    exp : ExperimentConfig = ExperimentConfig()
-    srepr : str = MISSING
+    kernel: KernelConfig = KernelConfig()
+    ndm: NDMConfig = NDMConfig()
+    exp: ExperimentConfig = ExperimentConfig()
+    srepr: str = MISSING
 
 
 srepr = "test"
-cfg = Config(srepr = srepr)
+cfg = Config(srepr=srepr)

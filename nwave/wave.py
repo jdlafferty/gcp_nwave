@@ -13,6 +13,9 @@ Encapsulate dictlearner and neurodynamics to form a wave object
 import numpy as cp
 from tqdm import trange
 
+from configs import cfg
+from nwave.utils import get_fpath_from_configs
+
 
 class Wave():
     '''
@@ -73,6 +76,6 @@ class Wave():
                                      (l2l, 100 * l0l, self.neuron_dynamic_model.threshold))
                 tbar.refresh()
 
-        self.dict_learner.dump("result/")  # fpath
+        self.dict_learner.dump(get_fpath_from_configs(cfg))  # fpath
 
         return l2_loss, l1_loss, l0_loss

@@ -1,2 +1,5 @@
-ri,re,wi,we,neuron_shape,gradient_steps,batch_size,lr_act,lr_codebook,l0_target,threshold
-5,3,5,30,1600,30000,256,0.01,0.01,0.2,0.01
+ri,re,wi,we,neuron_shape,gradient_steps,batch_size,lr_act,lr_codebook,l0_target,threshold,training_time,loss
+5,3,5,30,1600,10000,256,0.01,0.01,0.2,0.01,7h 28m 20s,49.43
+5,3,5,30,100,3000,256,0.01,0.01,0.2,0.007,0h 17m 5s,75.52
+5,3,5,30,400,10000,256,0.01,0.01,0.2,0.01,2h 10m 37s,66.02
+5,3,5,30,100,300,256,0.01,0.01,0.2,0.01,0h 1m 12s,75.81

@@ -5,23 +5,19 @@ A cupy implementation of nwave experiment
     - dictlearner.py :  update rule of feedforward weights
     - neurodynamics.py : update rule of activations
     - wave.py : combine dictlearner and neurodynamics
-    - utils.py : get convolutional kernels
-- experiment.py : interface to experiment
+    - utils.py : store many functions that will be used in other files
+- experiment.py : interface to experiment, including training, plotting receptive fields and plotting activations
 - dataloader.py : loading data 
-- act_vis.py : visualization tools
 - configs.py : store all the hyperparameters
-- visualization.py : plot l0, l1 and l2 errors
-- Word_activations.ipynb : plot activations according to certain words
-- test.py : save receptive fields 
 
 
 # start 
-gcloud compute instances start --zone "us-east4-b" "rob-test"
+To run the code, we only need to run experiment.py, and all the results will be stored in the result folder, by using `python experiment.py -- row [test number]`
 
-gcloud compute instances stop --zone "us-east4-b" "rob-test"
+To run the code on gcloud, using the following command:
 
-gcloud compute ssh --zone "us-east4-b" "rob-test"  --tunnel-through-iap --project "jl2994-nerualnet-project-aa1f"
+`gcloud compute instances start --zone "us-east4-b" "rob-test"`
 
+`gcloud compute instances stop --zone "us-east4-b" "rob-test"`
 
-# Activate Conda 
-source /home/tracey/miniconda3/bin/activate tracey
+`gcloud compute ssh --zone "us-east4-b" "rob-test"  --tunnel-through-iap --project "jl2994-nerualnet-project-aa1f"`
