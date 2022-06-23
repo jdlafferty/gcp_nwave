@@ -7,17 +7,29 @@ A cupy implementation of nwave experiment
     - wave.py : combine dictlearner and neurodynamics
     - utils.py : store many functions that will be used in other files
 - experiment.py : interface to experiment, including training, plotting receptive fields and plotting activations
-- dataloader.py : loading data 
-- configs.py : store all the hyperparameters
+- dataloader.py : load data 
+- configs.py : read all the hyperparameters
 
 
 # start 
-To run the code, we only need to run experiment.py, and all the results will be stored in the result folder, by using `python experiment.py -- row [test number]`
+To run the project locally, run `python experiment.py -- row [test number]`, and all the results will be stored in the result folder.
 
-To run the code on gcloud, using the following command:
+To run the project on gcloud, these are the steps to start and stop an instance on GCP:
 
-`gcloud compute instances start --zone "us-east4-b" "rob-test"`
+Install gcloud cli
+  https://cloud.google.com/sdk/docs/install
 
-`gcloud compute instances stop --zone "us-east4-b" "rob-test"`
+Login to gcloud using netid:
+  `gcloud auth login`
 
-`gcloud compute ssh --zone "us-east4-b" "rob-test"  --tunnel-through-iap --project "jl2994-nerualnet-project-aa1f"`
+Set project:
+  `gcloud config set project jl2994-nerualnet-project-aa1f`
+
+Start instance:
+  `gcloud compute instances start --zone "us-east4-b" "rob-test"`
+
+SSH to instance:
+  `gcloud compute ssh --zone "us-east4-b" "rob-test" --tunnel-through-iap --project "jl2994-nerualnet-project-aa1f"`
+
+Stop instance
+  `gcloud compute instances stop --zone "us-east4-b" "rob-test"`
