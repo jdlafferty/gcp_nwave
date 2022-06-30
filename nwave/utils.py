@@ -119,7 +119,8 @@ def get_colors(Vt, alpha=0.5):
 
 
 def plot_PCA(Phi, filename=''):
-    Phi = numpy.asarray(Phi)
+    if get_argsprocessor()  == "GPU":
+        Phi = cp.asnumpy(Phi)
     U, S, Vt = numpy.linalg.svd(Phi.T, full_matrices=False)   # Phi: 97 * 400
     principal_score = U @ numpy.diag(S)[:, :3]
     principal_scoreT = rescale(principal_score.T, 0.05)
