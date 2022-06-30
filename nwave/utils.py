@@ -11,9 +11,12 @@ Zhiyuan Long (zhiyuan.long@yale.edu)
 import os
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
-import numpy as cp
-
+import numpy
 from configs import *
+if get_argsprocessor() == "CPU":
+    import numpy as cp
+elif get_argsprocessor() == "GPU":
+    import cupy as cp
 
 plt.rcParams['figure.figsize'] = (8, 6)  # set default size of plots
 plt.rcParams['image.interpolation'] = 'nearest'
@@ -66,7 +69,7 @@ def get_fpath_from_configs(cfg):
 def plot_colortable(colors, text_on=True):
     # ref: https://matplotlib.org/stable/gallery/color/named_colors.html#sphx-glr-gallery-color-named-colors-py
     nunit = len(colors)
-    side_length = int(cp.sqrt(nunit))
+    side_length = int(numpy.sqrt(nunit))
     swatch_width = cell_width = cell_height = 32
     # set figs
     ncols = nrows = side_length
@@ -102,9 +105,9 @@ def plot_colortable(colors, text_on=True):
 
 
 def rescale(vec, qt):
-    qtmin = cp.quantile(vec, qt, axis=1)[:, cp.newaxis]
-    qtmax = cp.quantile(vec, 1 - qt, axis=1)[:, cp.newaxis]
-    return cp.minimum(cp.maximum((vec - qtmin) / (qtmax - qtmin), 0), 1)
+    qtmin = numpy.quantile(vec, qt, axis=1)[:, numpy.newaxis]
+    qtmax = numpy.quantile(vec, 1 - qt, axis=1)[:, numpy.newaxis]
+    return numpy.minimum(numpy.maximum((vec - qtmin) / (qtmax - qtmin), 0), 1)
 
 
 def get_colors(Vt, alpha=0.5):
@@ -116,8 +119,8 @@ def get_colors(Vt, alpha=0.5):
 
 
 def plot_PCA(Phi, filename=''):
-    U, S, Vt = cp.linalg.svd(Phi.T, full_matrices=False)   # Phi: 97 * 400
-    principal_score = U @ cp.diag(S)[:, :3]
+    U, S, Vt = numpy.linalg.svd(Phi.T, full_matrices=False)   # Phi: 97 * 400
+    principal_score = U @ numpy.diag(S)[:, :3]
     principal_scoreT = rescale(principal_score.T, 0.05)
     colors = get_colors(principal_scoreT, alpha=0.8)
     fig = plot_colortable(colors, text_on=False)
