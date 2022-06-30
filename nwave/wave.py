@@ -71,9 +71,9 @@ class Wave():
 
             l0l, l1l, l2l = self.train_dictionary(word_batch = this_X) #this_X : 256 * 97
 
-            l2_loss.append(l2l)
-            l1_loss.append(l1l)
-            l0_loss.append(l0l)
+            l2_loss.append(float(l2l))
+            l1_loss.append(float(l1l))
+            l0_loss.append(float(l0l))
 
             if i % 100 == 0:
                 tbar.set_description("loss=%.3f sparsity=%2.2f%% lmda=%.3f" % \
