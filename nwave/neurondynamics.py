@@ -133,7 +133,7 @@ class L1ActDoubleDecker(_NeuronDynamicsModel):
         self.inh_act.fill(0)
 
     def stimulate(self, stimulus):  # stimulus: (256, 20, 20)
-        for t in range(self.max_act_fit):
+        for t in range(int(self.max_act_fit)):
             self.advance(stimulus)
 
             da = self.exc_act - self.exc_act_tm1
