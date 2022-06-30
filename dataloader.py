@@ -66,8 +66,8 @@ class UnigramLoader(_DataLoader):
         self.word_embeddings = cp.asarray(self.word_embeddings)
         self.word_freq = cp.load("../data/googleNgram/1gramSortedFreq.npy")
         self.num_train_vocabs = self.word_freq.shape[0]
-        self.num_test_vocabs = cp.asarray(20000)
-        self.SUBSAMPLE_SIZE = cp.asarray(4096)
+        self.num_test_vocabs = numpy.asarray(20000)
+        self.SUBSAMPLE_SIZE = numpy.asarray(4096)
 
     def __str__(self):
         return "Google 1 Gram freq; Glove Embedding with dim=97 after removing 3 systematic bias"
