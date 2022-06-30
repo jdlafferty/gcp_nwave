@@ -73,7 +73,8 @@ class UnigramLoader(_DataLoader):
         return "Google 1 Gram freq; Glove Embedding with dim=97 after removing 3 systematic bias"
 
     def sample_word_idx(self, batch_size):
-        subsampled_idx = cp.random.randint(0, self.num_train_vocabs, self.SUBSAMPLE_SIZE)
+        subsampled_idx = numpy.random.randint(0, self.num_train_vocabs, self.SUBSAMPLE_SIZE)
+        subsampled_idx = cp.asarray(subsampled_idx)
         prob = self.word_freq[subsampled_idx]
         prob = prob / cp.abs(prob).sum()
         sampled_locs = cp.random.choice(a = subsampled_idx, size = batch_size, replace = False, p=prob)
