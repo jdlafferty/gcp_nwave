@@ -11,12 +11,9 @@ Zhiyuan Long (zhiyuan.long@yale.edu)
 import os
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
-import numpy
+import numpy as cp
+
 from configs import *
-if get_argsprocessor() == "CPU":
-    import numpy as cp
-elif get_argsprocessor() == "GPU":
-    import cupy as cp
 
 plt.rcParams['figure.figsize'] = (8, 6)  # set default size of plots
 plt.rcParams['image.interpolation'] = 'nearest'
