@@ -82,4 +82,4 @@ class Wave():
 
         self.dict_learner.dump(get_fpath_from_configs(cfg))  # fpath
 
-        return l2_loss, l1_loss, l0_loss
+        return cp.asarray(l2_loss), cp.asarray(l1_loss), cp.asarray(l0_loss)
