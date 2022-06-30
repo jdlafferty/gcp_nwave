@@ -16,14 +16,17 @@ The main method is the dynamic
 from abc import ABC, abstractmethod 
 import logging 
 import pickle
+from configs import *
 
 logger = logging.getLogger(__name__)
 logger.addHandler(logging.NullHandler())
 
-#import cupy as cp
-#import cusignal
-import numpy as cp
-from scipy import signal
+if get_argsprocessor() == "CPU":
+    import numpy as cp
+    from scipy.signal import convolve
+elif get_argsprocessor() == "GPU":
+    import cupy as cp
+    from cusignal.convolution.convolve import convolve
 
 REGISTRY = {}
 
@@ -35,7 +38,6 @@ def register(cls_name):
         REGISTRY[cls_name] = cls
         return cls
     return registerer
-
 
 
 class _NeuronDynamicsModel(ABC):
@@ -152,8 +154,8 @@ class L1ActDoubleDecker(_NeuronDynamicsModel):
 
         #exc_input = cusignal.convolve2d(self.exc_act, self.exck, mode = "same")
         #inh_input = cusignal.convolve2d(self.inh_act, self.inhk, mode = "same")
-        exc_input = signal.convolve(self.exc_act, self.exck, mode="same")  # (256, 20, 20)
-        inh_input = signal.convolve(self.inh_act, self.inhk, mode="same")
+        exc_input = convolve(self.exc_act, self.exck, mode="same")  # (256, 20, 20)
+        inh_input = convolve(self.inh_act, self.inhk, mode="same")
 
         self.exc_act , self.inh_act = self.exc_act + \
             self.lr_act * (

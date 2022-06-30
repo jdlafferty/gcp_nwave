@@ -21,10 +21,10 @@ import argparse
 def parse_argv():
     parser = argparse.ArgumentParser(prog='SC')
     parser.add_argument("--row", type = int)
+    parser.add_argument("--processor", type = str)
     return parser.parse_args()
 
 args = parse_argv()
-
 
 params = []
 with open('parameter.csv', 'r') as read_obj:
@@ -42,6 +42,8 @@ param = params[i-1]
 def get_argsrow():
     return i
 
+def get_argsprocessor():
+    return args.processor
 
 def get_neuron_shape(x):
     y = int(math.sqrt(x))

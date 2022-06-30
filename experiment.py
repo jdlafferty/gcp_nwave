@@ -17,10 +17,15 @@ The experiment process
 # Experiment Setup 
 #################################
 
-#import cupy as cp
+from configs import *
+
+if get_argsprocessor() == "GPU":
+    import cupy as cp
+elif get_argsprocessor() == "CPU":
+    import numpy as cp
+
 import time
-import numpy as cp
-from configs import cfg
+
 from nwave.utils import *
 import nwave.wave as wave
 import matplotlib.pyplot as plt
@@ -68,13 +73,18 @@ print("The training time is: " + str(time))
 errors = cp.column_stack((l2_loss, l1_loss, l0_loss))
 vis_error(errors, fpath)
 
-from configs import get_argsrow
 with open('parameter.csv', 'r') as csvfile:
     reader = csv.reader(csvfile)
     rows = [i for i in reader]
 
-rows[get_argsrow()][11] = time
-rows[get_argsrow()][12] = round(l2_loss[-1], 2)
+if get_argsprocessor() == 'CPU':
+    rows[get_argsrow()][11] = time
+    rows[get_argsrow()][13] = round(l2_loss[-1], 2)
+elif get_argsprocessor() == 'GPU':
+    rows[get_argsrow()][12] = time
+    rows[get_argsrow()][14] = round(l2_loss[-1], 2)
+
+
 
 with open('parameter.csv', 'w') as csvfile:
     writer = csv.writer(csvfile)

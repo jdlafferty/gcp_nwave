@@ -9,8 +9,12 @@ Zhiyuan Long (zhiyuan.long@yale.edu)
 Encapsulate dictlearner and neurodynamics to form a wave object
 '''
 
-#import cupy as cp
-import numpy as cp
+from configs import *
+if get_argsprocessor() == "CPU":
+    import numpy as cp
+elif get_argsprocessor() == "GPU":
+    import cupy as cp
+
 from tqdm import trange
 
 from configs import cfg

@@ -18,9 +18,12 @@ def register(cls_name):
     return registerer
 
 from abc import ABC, abstractmethod 
+from configs import *
 
-#import cupy as cp
-import numpy as cp
+if get_argsprocessor() == "CPU":
+    import numpy as cp
+elif get_argsprocessor() == "GPU":
+    import cupy as cp
 
 class _DataLoader(ABC): 
     '''Universal interface for all data loaders

@@ -12,7 +12,7 @@ A cupy implementation of nwave experiment
 
 
 # start 
-To run the project locally, run `python experiment.py -- row [test number]`, and all the results will be stored in the result folder.
+To run the project locally, run `python experiment.py --row [test number] --processor [CPU/GPU] `, and all the results will be stored in the result folder.
 
 To run the project on gcloud, these are the steps to start and stop an instance on GCP:
 

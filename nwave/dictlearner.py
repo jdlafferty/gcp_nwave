@@ -15,9 +15,12 @@ Main actions:
 '''
 
 from abc import ABC, abstractmethod
-#import cupy as cp
-import numpy as cp
-from tqdm import trange
+from configs import *
+
+if get_argsprocessor() == "CPU":
+    import numpy as cp
+elif get_argsprocessor() == "GPU":
+    import cupy as cp
 
 REGISTRY = {}
 
