@@ -61,7 +61,7 @@ class UnigramLoader(_DataLoader):
     def __init__(self, batch_size):
         self.batch_size = batch_size    
         self.cnt = 0
-        self.word_embeddings = cp.load('../data/googleNgram/embed100.npy')
+        self.word_embeddings = numpy.load('../data/googleNgram/embed100.npy')
         self.word_embeddings = numpy.delete(self.word_embeddings, [55, 58, 84], axis = 1)
         self.word_embeddings = cp.asarray(self.word_embeddings)
         self.word_freq = cp.load("../data/googleNgram/1gramSortedFreq.npy")
