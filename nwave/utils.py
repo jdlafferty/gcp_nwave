@@ -11,7 +11,7 @@ Zhiyuan Long (zhiyuan.long@yale.edu)
 import os
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
-
+import numpy
 from configs import *
 if get_argsprocessor() == "CPU":
     import numpy as cp
@@ -42,6 +42,7 @@ def get_kernels(re, ri, wi=5, we=30, sigmaE = 3):
     return k_exc, k_inh
 
 def vis_error(error, fpath, train_start_step=0):
+    error = numpy.asarray(error)
     fig, (ax0, ax1, ax2) = plt.subplots(nrows=1, ncols=3, figsize=(20, 3))
     ax0.plot(error[:, 0])
     ax0.set_title("reconstruction error")
