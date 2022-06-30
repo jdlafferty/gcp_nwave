@@ -7,6 +7,7 @@ Uniform interface to load data
 '''
 
 REGISTRY = {}
+import numpy
 
 def register(cls_name):
     '''A decorator to set the name of the class and add the name to DataLoaders
@@ -61,7 +62,8 @@ class UnigramLoader(_DataLoader):
         self.batch_size = batch_size    
         self.cnt = 0
         self.word_embeddings = cp.load('../data/googleNgram/embed100.npy')
-        self.word_embeddings = cp.delete(self.word_embeddings, [55, 58, 84], axis = 1)
+        self.word_embeddings = numpy.delete(self.word_embeddings, [55, 58, 84], axis = 1)
+        self.word_embeddings = cp.asarray(self.word_embeddings)
         self.word_freq = cp.load("../data/googleNgram/1gramSortedFreq.npy")
         self.num_train_vocabs = self.word_freq.shape[0]
         self.num_test_vocabs = cp.asarray(20000)
