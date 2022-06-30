@@ -18,7 +18,7 @@ The experiment process
 #################################
 
 from configs import *
-
+import numpy
 if get_argsprocessor() == "GPU":
     import cupy as cp
 elif get_argsprocessor() == "CPU":
@@ -70,7 +70,7 @@ h, m = divmod(m, 60)
 time = str(int(h))+"h "+str(int(m))+"m "+str(int(s))+"s"
 print("The training time is: " + str(time))
 
-errors = cp.column_stack((l2_loss, l1_loss, l0_loss))
+errors = numpy.column_stack((l2_loss, l1_loss, l0_loss))
 vis_error(errors, fpath)
 
 with open('parameter.csv', 'r') as csvfile:
