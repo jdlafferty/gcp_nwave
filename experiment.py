@@ -139,7 +139,7 @@ with open(fpath + '/uactivity.npy', 'wb') as f:
 #################################
 # Plot activations
 #################################
-activity = cp.load(fpath + "uactivity.npy")
+activity = numpy.load(fpath + "uactivity.npy")
 with open('../data/googleNgram/4vocabidx.pkl', 'rb') as f:
     vocabidx = pickle.load(f)
 
@@ -152,7 +152,7 @@ def plot_word_activations(words, filename=''):
             print("word: {} not found".format(word))
         else:
             fig, ax = plt.subplots(figsize=(5, 5))
-            l0norm = cp.abs(activ).max()
+            l0norm = numpy.abs(activ).max()
             im = ax.imshow(activ.reshape(cfg.exp.neuron_shape[0], cfg.exp.neuron_shape[1]),
                                cmap='jet', interpolation='gaussian', vmin=-l0norm, vmax=l0norm)
             divider = make_axes_locatable(ax)
