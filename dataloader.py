@@ -64,7 +64,7 @@ class UnigramLoader(_DataLoader):
         self.word_embeddings = numpy.load('../data/googleNgram/embed100.npy')
         self.word_embeddings = numpy.delete(self.word_embeddings, [55, 58, 84], axis = 1)
         self.word_embeddings = cp.asarray(self.word_embeddings)
-        self.word_freq = cp.load("../data/googleNgram/1gramSortedFreq.npy")
+        self.word_freq = numpy.load("../data/googleNgram/1gramSortedFreq.npy")
         self.num_train_vocabs = self.word_freq.shape[0]
         self.num_test_vocabs = numpy.asarray(20000)
         self.SUBSAMPLE_SIZE = numpy.asarray(4096)
