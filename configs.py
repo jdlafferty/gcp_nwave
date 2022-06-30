@@ -11,7 +11,7 @@ Config class and CLI to set config
 
 from dataclasses import dataclass
 
-from omegaconf import OmegaConf, MISSING
+#from omegaconf import OmegaConf, MISSING
 
 from csv import DictReader
 
@@ -87,7 +87,7 @@ class Config:
     kernel: KernelConfig = KernelConfig()
     ndm: NDMConfig = NDMConfig()
     exp: ExperimentConfig = ExperimentConfig()
-    srepr: str = MISSING
+    srepr: str = None
 
 
 srepr = "test"
