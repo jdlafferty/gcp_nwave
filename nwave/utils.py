@@ -119,6 +119,7 @@ def get_colors(Vt, alpha=0.5):
 
 
 def plot_PCA(Phi, filename=''):
+    Phi = numpy.asarray(Phi)
     U, S, Vt = numpy.linalg.svd(Phi.T, full_matrices=False)   # Phi: 97 * 400
     principal_score = U @ numpy.diag(S)[:, :3]
     principal_scoreT = rescale(principal_score.T, 0.05)
@@ -127,7 +128,4 @@ def plot_PCA(Phi, filename=''):
     if len(filename) > 0:
         fig.savefig(filename, bbox_inches='tight')
     plt.close()
-
-
-
 
