@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <math.h>
 
 void print_matrix(int row, int col, int m[row][col]) {
     for (int i = 0; i < row; i++) {
@@ -41,8 +42,8 @@ int dot(int l, int a[l], int b[l]) {
     return c;
 }
 
-int norm(int l, int v[l]) {
-    return dot(l, v, v);
+float norm(int l, int v[l]) {
+    return sqrt(dot(l, v, v));
 }
 
 void right_multiply(int row, int col, int m[row][col], int v[col], int c[row]) {
