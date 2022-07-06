@@ -103,12 +103,10 @@ def plot_colortable(colors, text_on=True):
 
     return fig
 
-
 def rescale(vec, qt):
     qtmin = numpy.quantile(vec, qt, axis=1)[:, numpy.newaxis]
     qtmax = numpy.quantile(vec, 1 - qt, axis=1)[:, numpy.newaxis]
     return numpy.minimum(numpy.maximum((vec - qtmin) / (qtmax - qtmin), 0), 1)
-
 
 def get_colors(Vt, alpha=0.5):
     _, n = Vt.shape
@@ -116,7 +114,6 @@ def get_colors(Vt, alpha=0.5):
     for i in range(n):
         colors.append((*Vt[:, i], alpha))
     return colors
-
 
 def plot_PCA(Phi, filename=''):
     if get_argsprocessor()  == "GPU":

@@ -152,22 +152,13 @@ class L1ActDoubleDecker(_NeuronDynamicsModel):
         # exc_act : 256*20*20
         # exck : 1*7*7
 
-        #exc_input = cusignal.convolve2d(self.exc_act, self.exck, mode = "same")
-        #inh_input = cusignal.convolve2d(self.inh_act, self.inhk, mode = "same")
         exc_input = convolve(self.exc_act, self.exck, mode="same")  # (256, 20, 20)
         inh_input = convolve(self.inh_act, self.inhk, mode="same")
 
-        self.exc_act , self.inh_act = self.exc_act + \
-            self.lr_act * (
-                - self.leaky * self.exc_act + stimulus + exc_input -inh_input
-            ) , self.inh_act + \
-                self.lr_act * (
-                    -self.leaky * self.inh_act + exc_input
-                )
+        self.exc_act = self.exc_act + self.lr_act * (- self.leaky * self.exc_act + stimulus + exc_input -inh_input)
 
         # Soft threshold 
         self.exc_act = cp.maximum(self.exc_act - self.threshold, 0) - cp.maximum(-self.exc_act - self.threshold, 0)
-        self.inh_act = cp.maximum(self.inh_act - self.threshold, 0) - cp.maximum(-self.inh_act - self.threshold, 0)
 
     def evolve(self):
         dthreshold = cp.mean((cp.abs(self.exc_act) > 1e-4)) - self.l0_target

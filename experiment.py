@@ -85,7 +85,6 @@ elif get_argsprocessor() == 'GPU':
     rows[get_argsrow()][14] = round(l2_loss[-1], 2)
 
 
-
 with open('parameter.csv', 'w') as csvfile:
     writer = csv.writer(csvfile)
     for i in range(len(rows)):
