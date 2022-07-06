@@ -25,7 +25,7 @@ def dot(a, b):
     return sum
 
 def norm(v):
-    return dot(v, v)
+    return (dot(v, v))**(1/2)
 
 def right_multiply(m, v):
     output = []
