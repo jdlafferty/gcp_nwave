@@ -9,9 +9,13 @@ A cupy implementation of nwave experiment
 - experiment.py : interface to experiment, including training, plotting receptive fields and plotting activations
 - dataloader.py : load data 
 - configs.py : read all the hyperparameters
-- compute_whole_activ.py: compute whole "activity.npy", which contains the activations of over 50,000 words.
-- compute_act_convolve.py: Don't compute whole activity file. Given some words, plot corresponding activations using spicy.convolve.
-- compute_act_laplacian.py: Don't compute whole activity file. Given some words, plot corresponding activations using multiplication of laplacian matrix and activations.
+- compute_whole_activ.py: compute whole "activity.npy", which contains the activations of over 50,000 words
+- compute_act_convolve.py: Don't compute whole activity file. Given some words, plot corresponding activations using spicy.convolve
+- compute_act_laplacian.py: Don't compute whole activity file. Given some words, plot corresponding activations using multiplication of laplacian matrix and activations
+- matrix.py: implement vector multiplication and matrix multiplication in pure python
+- c_matrix/ : convert the program to c
+    - makefile: to compile the c code
+    - matrix.c: implement vector multiplication and matrix multiplication in pure c
 
 
 # start 

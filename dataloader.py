@@ -1,7 +1,10 @@
 '''
 ==========
-Date : Apr 7, 2022 
-Maintainer: Xinyi Zhong (xinyi.zhong@yale.edu)
+Date: July 5, 2022
+Maintainer:
+Xinyi Zhong (xinyi.zhong@yale.edu)
+Xinchen Du (xinchen.du@yale.edu)
+Zhiyuan Long (zhiyuan.long@yale.edu)
 ==========
 Uniform interface to load data
 '''
