@@ -1,4 +1,4 @@
-A cupy implementation of nwave experiment 
+A cupy implementation of the nwave experiments
 
 ## Directory Structure
 - nwave/ : implementation of nwave algorithms.
