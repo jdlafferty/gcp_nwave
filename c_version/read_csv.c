@@ -41,8 +41,14 @@ void write_matrix(int row, int col, float** mat, char* filename) {
     fclose(fp);
 } 
 
-int main(){
+int main() {
     float** mat = read_matrix(55529, 97, "word_embeddings.csv");
     write_matrix(55529, 97, mat, "word_embeddings.csv");
+
+    for (int i = 0; i < 55529; i++) {
+        free(mat[i]);
+    }
+    free(mat);
+
     return 0;
 }

@@ -123,7 +123,15 @@ int main() {
     printf("vector:\n");
     print_vector(2, v);
     printf("result:\n");
-    print_vector(3, right_multiply(3, 2, m, v));
+    float* c = right_multiply(3, 2, m, v);
+    print_vector(3, c);
+
+    free(c);
+    free(v);
+    for (int i = 0; i < 3; i++) {
+        free(m[i]);
+    }
+    free(m);
 
     return 0;
 }
