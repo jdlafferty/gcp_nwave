@@ -1,5 +1,0 @@
-make --dry-run --always-make --keep-going --print-directory
-make: Entering directory `/Users/rhettlong/Library/CloudStorage/OneDrive-CUHK-Shenzhen/All/Study/Yale/Y4 Summer/Research/Neural Waves/gcp_nwave/c_version'
-gcc -o Matrix -std=c99 -Wall -pedantic -g3 matrix_float.c
-make: Leaving directory `/Users/rhettlong/Library/CloudStorage/OneDrive-CUHK-Shenzhen/All/Study/Yale/Y4 Summer/Research/Neural Waves/gcp_nwave/c_version'
- 
