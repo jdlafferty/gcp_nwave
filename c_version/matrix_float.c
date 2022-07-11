@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <math.h>
+#include <stdlib.h>
 
 void print_matrix(int row, int col, float** m) {
     for (int i = 0; i < row; i++) {
@@ -8,6 +9,13 @@ void print_matrix(int row, int col, float** m) {
         }
         printf("\n");
     }
+}
+
+void print_vector(int l, float* v) {
+    for (int i = 0; i < l; i++) {
+        printf("%f ", v[i]);
+    }
+    printf("\n");
 }
 
 float** transpose(int row, int col, float** a) {
@@ -93,3 +101,30 @@ float* left_multiply(int row, int col, float* v, float** m) {
 
     return c;
 }
+
+
+int main() {
+    float** m = malloc(sizeof(float*) * 3);
+    for (int i = 0; i < 3; i++) {
+        m[i] = malloc(sizeof(float) * 2);
+    }
+
+    for (int i = 0; i < 3; i++) {
+        for (int j = 0; j < 2; j++) {
+            m[i][j] = (float)(i + j) / 2;
+        }
+    }
+
+    float* v = malloc(sizeof(float) * 2);
+    v[0] = 2; v[1] = 1.5;
+
+    printf("matrix:\n");
+    print_matrix(3, 2, m);
+    printf("vector:\n");
+    print_vector(2, v);
+    printf("result:\n");
+    print_vector(3, right_multiply(3, 2, m, v));
+
+    return 0;
+}
+
