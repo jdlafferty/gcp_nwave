@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
+#include <string.h>
 
 void print_matrix(int row, int col, float** m) {
     for (int i = 0; i < row; i++) {
@@ -9,6 +10,37 @@ void print_matrix(int row, int col, float** m) {
         }
         printf("\n");
     }
+}
+
+float** copy_matrix(int row, int col, float** m){
+    float** copy = malloc(sizeof(float*) * row);
+    for (int i = 0; i < row; i++) {
+        copy[i] = malloc(sizeof(float) * col);
+    }
+
+    for (int i = 0 ; i < row; i++){
+        for (int j = 0; j < col; j++){
+            copy[i][j] = m[i][j];
+        }
+    }
+
+    return copy;
+}
+
+float** malloc_matrix(int row, int col){
+    float** result = malloc(sizeof(float*) * row);
+    for (int i = 0; i < row; i++) {
+        result[i] = malloc(sizeof(float) * col);
+    }
+
+    return result;
+}
+
+void free_matrix(int row, float ** m){
+    for (int i = 0; i < row; i++) {
+        free(m[i]);
+    }
+    free(m);
 }
 
 void print_vector(int l, float* v) {
@@ -58,6 +90,58 @@ float** multiply(int r1, int c1, int c2, float** a, float** b) {
     return c;
 }
 
+float** matrix_sum(int r, int c, float** a, float** b) {
+    float** p = malloc(sizeof(float*) * r);
+    for (int i = 0; i < r; i++) {
+        p[i] = malloc(sizeof(float) * c);
+    }
+
+    for (int i = 0; i < r; i++) {
+        for (int j = 0; j < c; j++) {
+            p[i][j] = 0;
+        }
+    }
+
+    for (int i = 0; i < r; i++) {
+        for (int j = 0; j < c; j++) {
+            p[i][j] = a[i][j] + b[i][j];
+        }
+    }
+
+    return p;
+}
+
+float** matrix_minus(int r, int c, float** a, float** b) {
+    float** p = malloc(sizeof(float*) * r);
+
+    for (int i = 0; i < r; i++) {
+        p[i] = malloc(sizeof(float) * c);
+    }
+
+    for (int i = 0; i < r; i++) {
+        for (int j = 0; j < c; j++) {
+            p[i][j] = 0;
+        }
+    }
+
+    for (int i = 0; i < r; i++) {
+        for (int j = 0; j < c; j++) {
+            p[i][j] = a[i][j] - b[i][j];
+        }
+    }
+
+    return p;
+}
+
+void scalar_matrix(int r, int c, float v, float** a){
+
+    for (int i =0; i < r; i++){
+        for (int j =0; j < c; j++){
+            a[i][j] = v * a[i][j];
+        }
+    }
+}
+
 float dot(int l, float* a, float* b) {
     float c = 0.0;
     for (int i = 0; i < l; i++) {
@@ -102,37 +186,11 @@ float* left_multiply(int row, int col, float* v, float** m) {
     return c;
 }
 
-
-int main() {
-    float** m = malloc(sizeof(float*) * 3);
-    for (int i = 0; i < 3; i++) {
-        m[i] = malloc(sizeof(float) * 2);
+float sum(int length, float* W){
+    float count = 0;
+    for (int i = 0; i < length; i++){
+        count += W[i];
     }
-
-    for (int i = 0; i < 3; i++) {
-        for (int j = 0; j < 2; j++) {
-            m[i][j] = (float)(i + j) / 2;
-        }
-    }
-
-    float* v = malloc(sizeof(float) * 2);
-    v[0] = 2; v[1] = 1.5;
-
-    printf("matrix:\n");
-    print_matrix(3, 2, m);
-    printf("vector:\n");
-    print_vector(2, v);
-    printf("result:\n");
-    float* c = right_multiply(3, 2, m, v);
-    print_vector(3, c);
-
-    free(c);
-    free(v);
-    for (int i = 0; i < 3; i++) {
-        free(m[i]);
-    }
-    free(m);
-
-    return 0;
+    return count;
 }
 
