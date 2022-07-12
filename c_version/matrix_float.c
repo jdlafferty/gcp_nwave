@@ -1,7 +1,6 @@
 #include <stdio.h>
 #include <math.h>
 #include <stdlib.h>
-#include <string.h>
 
 void print_matrix(int row, int col, float** m) {
     for (int i = 0; i < row; i++) {
@@ -12,14 +11,14 @@ void print_matrix(int row, int col, float** m) {
     }
 }
 
-float** copy_matrix(int row, int col, float** m){
+float** copy_matrix(int row, int col, float** m) {
     float** copy = malloc(sizeof(float*) * row);
     for (int i = 0; i < row; i++) {
         copy[i] = malloc(sizeof(float) * col);
     }
 
-    for (int i = 0 ; i < row; i++){
-        for (int j = 0; j < col; j++){
+    for (int i = 0; i < row; i++) { 
+        for (int j = 0; j < col; j++) {
             copy[i][j] = m[i][j];
         }
     }
@@ -27,7 +26,23 @@ float** copy_matrix(int row, int col, float** m){
     return copy;
 }
 
-float** malloc_matrix(int row, int col){
+float** sample_matrix(int row, int col, int sample_size, float** m) {
+    float** sample = malloc(sizeof(float*) * sample_size);
+    for (int i = 0; i < sample_size; i++) {
+        sample[i] = malloc(sizeof(float) * col);
+    }
+
+    for (int i = 0; i < sample_size; i++) { 
+        int m_row = rand() % row;
+        for (int j = 0; j < col; j++) {
+            sample[i][j] = m[m_row][j];
+        }
+    }
+
+    return sample;
+}
+
+float** malloc_matrix(int row, int col) {
     float** result = malloc(sizeof(float*) * row);
     for (int i = 0; i < row; i++) {
         result[i] = malloc(sizeof(float) * col);
@@ -36,7 +51,7 @@ float** malloc_matrix(int row, int col){
     return result;
 }
 
-void free_matrix(int row, float ** m){
+void free_matrix(int row, float ** m) {
     for (int i = 0; i < row; i++) {
         free(m[i]);
     }
@@ -133,10 +148,10 @@ float** matrix_minus(int r, int c, float** a, float** b) {
     return p;
 }
 
-void scalar_matrix(int r, int c, float v, float** a){
+void scalar_matrix(int r, int c, float v, float** a) {
 
-    for (int i =0; i < r; i++){
-        for (int j =0; j < c; j++){
+    for (int i = 0; i < r; i++) {
+        for (int j = 0; j < c; j++) {
             a[i][j] = v * a[i][j];
         }
     }
@@ -186,9 +201,9 @@ float* left_multiply(int row, int col, float* v, float** m) {
     return c;
 }
 
-float sum(int length, float* W){
+float sum(int length, float* W) {
     float count = 0;
-    for (int i = 0; i < length; i++){
+    for (int i = 0; i < length; i++) {
         count += W[i];
     }
     return count;
