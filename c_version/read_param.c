@@ -18,7 +18,7 @@ int main(int argc, char **argv) {
             record = strtok(line, ",");
             while(record != NULL) {
                 param[j] = record;
-                printf("%s\n", record);
+                //printf("%s\n", record);
                 record = strtok(NULL,",");
                 j++;
             }
