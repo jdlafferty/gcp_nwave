@@ -1,5 +1,5 @@
 CC = gcc
 CFLAGS = -std=c99 -Wall -pedantic -g3
 
-Act: compute_act.c
+r: read_csv.c
 	${CC} -o $@ ${CFLAGS} $^

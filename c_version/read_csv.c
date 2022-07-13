@@ -1,6 +1,7 @@
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
+#include "matrix_float.c"
 
 float** read_matrix(int row, int col, char* filename) {
     float** mat = malloc(sizeof(float*) * row);
@@ -8,7 +9,7 @@ float** read_matrix(int row, int col, char* filename) {
         mat[i] = malloc(sizeof(float) * col);
     }
 
-    char buffer[1024];
+    char buffer[col*10];
     char* record;
     char* line;
     int i = 0, j;
@@ -41,14 +42,15 @@ void write_matrix(int row, int col, float** mat, char* filename) {
     fclose(fp);
 } 
 
-// int main() {
-//     float** mat = read_matrix(55529, 97, "word_embeddings.csv");
-//     write_matrix(55529, 97, mat, "word_embeddings.csv");
+int main() {
+    float** mat = read_matrix(97, 1600, "codebook.csv");
+    print_matrix(97, 1600, mat);
+    // write_matrix(55529, 97, mat, "word_embeddings.csv");
 
-//     for (int i = 0; i < 55529; i++) {
-//          free(mat[i]);
-//      }
-//     free(mat);
+    for (int i = 0; i < 55529; i++) {
+         free(mat[i]);
+     }
+    free(mat);
 
-//     return 0;
-// }
+    return 0;
+}
