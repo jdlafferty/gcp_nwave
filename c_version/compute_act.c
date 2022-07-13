@@ -267,12 +267,10 @@ int main(int argc, char **argv) {
     int neuron_shape = atoi(param[4]);
     int gradient_steps = atoi(param[5]);
     int bs = atoi(param[6]);
-    //float lr_act = atof(param[7]);
-    float lr_act = 0.01;
+    float lr_act = atof(param[7]);
     float lr_codebook = atof(param[8]);
     float l0_target = atof(param[9]);
-    //float threshold = atof(param[10]);
-    float threshold = 0.005;
+    float threshold = atof(param[10]);
     int sigmaE = 3;
     float eps = 5e-3;
 
@@ -310,7 +308,7 @@ int main(int argc, char **argv) {
     float** Phi = malloc_matrix(imbed_dim, neuron_shape);
     for (int i = 0; i < imbed_dim; i++) {
         for (int j = 0; j < neuron_shape; j++) {
-            Phi[i][j] = 0.3;
+            Phi[i][j] = 0.5;
         }
     }
 
