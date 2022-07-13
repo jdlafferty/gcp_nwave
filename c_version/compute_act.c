@@ -191,9 +191,9 @@ float** stimulate(int neuron_shape, int bs, float lr_act, float threshold, float
         free_matrix(bs, exc_act);
         exc_act = exc_act_new;
 
-        //printf("%d exc_act[1][1] = %f", t, exc_act[1][1]);
+        printf("%d exc_act[1][1] = %f", t, exc_act[1][1]);
         //print_matrix(bs, neuron_shape, exc_act);
-        //printf("\n");
+        printf("\n");
 
         float** da = matrix_minus(bs, neuron_shape, exc_act, exc_tm1);
 
@@ -308,11 +308,15 @@ int main(int argc, char **argv) {
     float** Phi = malloc_matrix(imbed_dim, neuron_shape);
     for (int i = 0; i < imbed_dim; i++) {
         for (int j = 0; j < neuron_shape; j++) {
-            Phi[i][j] = 0.5;
+            Phi[i][j] = 0.7 * rand()/(RAND_MAX+1.0);
         }
     }
 
     float** laplacian = get_laplacian_matrix(neuron_shape, re, ri, wi, we, sigmaE);
+
+    printf("laplacian = ");
+    print_matrix(neuron_shape, neuron_shape, laplacian);
+    printf("\n");
 
     float** stimulus = multiply(bs, imbed_dim, neuron_shape, word_batch, Phi);
 
@@ -325,6 +329,9 @@ int main(int argc, char **argv) {
 
     exc_act = stimulate(neuron_shape, bs, lr_act, threshold, eps, stimulus, exc_act, laplacian);
 
+    printf("exc_act = ");
+    print_matrix(bs, neuron_shape, exc_act);
+    printf("\n");
+
     return 0;
 }
-
