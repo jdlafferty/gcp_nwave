@@ -267,6 +267,7 @@ int main(int argc, char **argv) {
     int neuron_shape = atoi(param[4]);
     int gradient_steps = atoi(param[5]);
     int bs = atoi(param[6]);
+    //int bs = 10;
     float lr_act = atof(param[7]);
     float lr_codebook = atof(param[8]);
     float l0_target = atof(param[9]);
@@ -300,23 +301,22 @@ int main(int argc, char **argv) {
 
     float** mat = read_matrix(55529, imbed_dim, "word_embeddings.csv");
     float** word_batch = sample_matrix(55529, imbed_dim, bs, mat);
+    //float ** word_batch = sample_matrix1(55529, imbed_dim, bs, mat);
 
 //    printf("Word_batch = ");
 //    print_matrix(bs, imbed_dim, word_batch);
 //    printf("\n");
 
-    float** Phi = malloc_matrix(imbed_dim, neuron_shape);
-    for (int i = 0; i < imbed_dim; i++) {
-        for (int j = 0; j < neuron_shape; j++) {
-            Phi[i][j] = 0.7 * rand()/(RAND_MAX+1.0);
-        }
-    }
+    float** Phi = read_matrix(97, 1600, "codebook.csv");
+    // printf("Phi = ");
+    // print_matrix(97, 1600, Phi);
+    // printf("\n");
 
     float** laplacian = get_laplacian_matrix(neuron_shape, re, ri, wi, we, sigmaE);
 
-    printf("laplacian = ");
-    print_matrix(neuron_shape, neuron_shape, laplacian);
-    printf("\n");
+    // printf("laplacian = ");
+    // print_matrix(neuron_shape, neuron_shape, laplacian);
+    // printf("\n");
 
     float** stimulus = multiply(bs, imbed_dim, neuron_shape, word_batch, Phi);
 
@@ -329,9 +329,11 @@ int main(int argc, char **argv) {
 
     exc_act = stimulate(neuron_shape, bs, lr_act, threshold, eps, stimulus, exc_act, laplacian);
 
-    printf("exc_act = ");
-    print_matrix(bs, neuron_shape, exc_act);
-    printf("\n");
+    // printf("exc_act = ");
+    // print_matrix(bs, neuron_shape, exc_act);
+    // printf("\n");
+
+    write_matrix(bs, neuron_shape, exc_act, "exc_act.csv");
 
     return 0;
 }

@@ -42,6 +42,21 @@ float** sample_matrix(int row, int col, int sample_size, float** m) {
     return sample;
 }
 
+// float** sample_matrix1(int row, int col, int sample_size, float** m) {
+//     float** sample = malloc(sizeof(float*) * sample_size);
+//     for (int i = 0; i < sample_size; i++) {
+//         sample[i] = malloc(sizeof(float) * col);
+//     }
+
+//     for (int i = 0; i < sample_size; i++) { 
+//         for (int j = 0; j < col; j++) {
+//             sample[i][j] = m[i][j];
+//         }
+//     }
+
+//     return sample;
+// }
+
 float** malloc_matrix(int row, int col) {
     float** result = malloc(sizeof(float*) * row);
     for (int i = 0; i < row; i++) {
