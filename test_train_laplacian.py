@@ -21,7 +21,7 @@ lr_Phi = 0.01
 l0_target = 0.1
 threshold = 0.01
 initial_step = 0
-gradient_steps = 60000
+gradient_steps = 150000
 sigmaE = 3
 max_act_fit = 50
 eps = 5e-3
@@ -105,22 +105,22 @@ def get_laplacian(n, r1, r2, wi, we, sigmaE = 3):
 laplacian = get_laplacian(neuron_shape[0]*neuron_shape[1], r1 = re, r2 = ri, wi=wi, we=we)
 
 
-def stimulate(stimulus, exc_act, inh_act):  # stimulus: (256, 20, 20)
+def stimulate(stimulus, exc_act):  # stimulus: (256, 20, 20)
 
     for t in range(50):
         exc_act_tm1 = np.copy(exc_act)
 
-        #exc_act = exc_act + lr_act * (np.asarray(stimulus) - np.asarray(np.dot(exc_act, laplacian)))
+        exc_act = exc_act + lr_act * (np.asarray(stimulus) - np.asarray(np.dot(exc_act, laplacian)))
 
-        exc_input = convolve(exc_act, exck, mode="same")  # (256, 20, 20)
-        inh_input = convolve(inh_act, inhk, mode="same")
-
-        exc_act  = exc_act + lr_act * (- leaky * exc_act + stimulus + exc_input - inh_input)
-        inh_act = inh_act + lr_act * (- leaky * inh_act + exc_input)
+        # exc_input = convolve(exc_act, exck, mode="same")  # (256, 20, 20)
+        # inh_input = convolve(inh_act, inhk, mode="same")
+        #
+        # exc_act  = exc_act + lr_act * (- leaky * exc_act + stimulus + exc_input - inh_input)
+        # inh_act = inh_act + lr_act * (- leaky * inh_act + exc_input)
 
         # Soft threshold
         exc_act = np.maximum(exc_act - threshold, 0) - np.maximum(-exc_act - threshold, 0)
-        inh_act = np.maximum(inh_act - threshold, 0) - np.maximum(-inh_act - threshold, 0)
+        #inh_act = np.maximum(inh_act - threshold, 0) - np.maximum(-inh_act - threshold, 0)
 
         da = exc_act - exc_act_tm1
         relative_error = np.sqrt(np.square(da).sum()) / (eps + np.sqrt(np.square(exc_act_tm1).sum()))
@@ -148,14 +148,14 @@ tbar = trange(initial_step, initial_step + gradient_steps, desc='Training', leav
 for i in tbar:
     word_batch = load_train_batch()  #this_X : 256 * 97
 
-    stimulus = np.dot(word_batch, Phi).reshape((bs, neuron_shape[0], neuron_shape[1]))  # stimulus: (256, 20， 20)
+    stimulus = np.dot(word_batch, Phi)  # stimulus: (256, 20， 20)
     # Get neuron activity
 
-    exc_act = np.zeros(shape=(bs, neuron_shape[0], neuron_shape[1]))
-    inh_act = np.zeros(shape=(bs, neuron_shape[0], neuron_shape[1]))
+    exc_act = np.zeros(shape=(bs, neuron_shape[0]*neuron_shape[1]))
+    inh_act = np.zeros(shape=(bs, neuron_shape[0]*neuron_shape[1]))
 
-    activation = stimulate(stimulus, exc_act, inh_act)
-    activation = activation.reshape(bs, neuron_shape[0] * neuron_shape[1])
+    activation = stimulate(stimulus, exc_act)
+    #activation = activation.reshape(bs, neuron_shape[0] * neuron_shape[1])
 
     # Neuron model evolve and reset
     dthreshold = np.mean((np.abs(activation) > 1e-4)) - l0_target
