@@ -27,17 +27,15 @@ max_act_fit = 50
 eps = 5e-3
 
 
-word_freq = numpy.load("../data/googleNgram/1gramSortedFreq.npy")
-num_train_vocabs = word_freq.shape[0]
-print("num_train_vocabs = " + str(num_train_vocabs))
-SUBSAMPLE_SIZE = numpy.asarray(4096)
+# word_freq = numpy.load("../data/googleNgram/1gramSortedFreq.npy")
+# num_train_vocabs = word_freq.shape[0]
+# print("num_train_vocabs = " + str(num_train_vocabs))
+# SUBSAMPLE_SIZE = numpy.asarray(4096)
+
+num_train_vocabs = 55529
 
 def load_train_batch():
-    a = []
-    for i in range(55529):
-        a.append(i)
-    a = np.asarray(a)
-    sampled_idx = np.random.choice(a, bs, replace=False)
+    sampled_idx = np.random.choice(num_train_vocabs, bs, replace=False)
     word_batch = word_embeddings[sampled_idx,:]
     return word_batch
 

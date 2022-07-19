@@ -24,31 +24,15 @@ max_act_fit = 50
 eps = 5e-3
 
 
-def update_codebook(word_batch, neuron_activation, Phi):
-
-    fitted_value = np.dot(neuron_activation, np.transpose(Phi))
-
-    error = word_batch - fitted_value
-
-    gradient = np.dot(np.transpose(error), neuron_activation)
-
-    Phi += lr_Phi * (gradient - np.vstack(np.mean(gradient, axis=1)))
-
-    Phi = Phi / np.maximum(np.sqrt(np.square(Phi).sum(axis=0)), 1e-8)
-
-    return Phi
-
 word_freq = np.load("../data/googleNgram/1gramSortedFreq.npy")
 num_train_vocabs = word_freq.shape[0]
 print("num_train_vocabs = " + str(num_train_vocabs))
 SUBSAMPLE_SIZE = np.asarray(4096)
 
-# def load_train_batch(bs):
-#     a = []
-#     for i in range(55529):
-#         a.append(i)
-#     a = np.asarray(a)
-#     sampled_idx = np.random.choice(a, bs, replace=False)
+# num_train_vocabs = 55529
+
+# def load_train_batch():
+#     sampled_idx = np.random.choice(num_train_vocabs, bs, replace=False)
 #     word_batch = word_embeddings[sampled_idx,:]
 #     return word_batch
 
