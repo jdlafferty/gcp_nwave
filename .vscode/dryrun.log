@@ -1,0 +1,6 @@
+make --dry-run --always-make --keep-going --print-directory
+make: Entering directory `/Users/rhettlong/Library/CloudStorage/OneDrive-CUHK-Shenzhen/All/Study/Yale/Y4 Summer/Research/Neural Waves/gcp_nwave'
+make: Leaving directory `/Users/rhettlong/Library/CloudStorage/OneDrive-CUHK-Shenzhen/All/Study/Yale/Y4 Summer/Research/Neural Waves/gcp_nwave'
+ 
+make: *** No targets specified and no makefile found.  Stop.
+

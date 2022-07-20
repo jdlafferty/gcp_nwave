@@ -24,30 +24,30 @@ max_act_fit = 50
 eps = 5e-3
 
 
-word_freq = np.load("../data/googleNgram/1gramSortedFreq.npy")
-num_train_vocabs = word_freq.shape[0]
-print("num_train_vocabs = " + str(num_train_vocabs))
-SUBSAMPLE_SIZE = np.asarray(4096)
+# word_freq = np.load("../data/googleNgram/1gramSortedFreq.npy")
+# num_train_vocabs = word_freq.shape[0]
+# print("num_train_vocabs = " + str(num_train_vocabs))
+# SUBSAMPLE_SIZE = np.asarray(4096)
 
-# num_train_vocabs = 55529
-
-# def load_train_batch():
-#     sampled_idx = np.random.choice(num_train_vocabs, bs, replace=False)
-#     word_batch = word_embeddings[sampled_idx,:]
-#     return word_batch
-
-def sample_word_idx():
-    subsampled_idx = np.random.randint(0, num_train_vocabs, SUBSAMPLE_SIZE)
-    prob = word_freq[subsampled_idx]
-    prob = prob / np.abs(prob).sum()
-    sampled_locs = np.random.choice(a=subsampled_idx, size=bs, replace=False, p=prob)
-    sampled_locs = np.asarray(sampled_locs)
-    return sampled_locs
+num_train_vocabs = 55529
 
 def load_train_batch():
-    sampled_idx = sample_word_idx()
-    word_batch = word_embeddings[sampled_idx, :]
+    sampled_idx = np.random.choice(num_train_vocabs, bs, replace=False)
+    word_batch = word_embeddings[sampled_idx,:]
     return word_batch
+
+# def sample_word_idx():
+#     subsampled_idx = np.random.randint(0, num_train_vocabs, SUBSAMPLE_SIZE)
+#     prob = word_freq[subsampled_idx]
+#     prob = prob / np.abs(prob).sum()
+#     sampled_locs = np.random.choice(a=subsampled_idx, size=bs, replace=False, p=prob)
+#     sampled_locs = np.asarray(sampled_locs)
+#     return sampled_locs
+
+# def load_train_batch():
+#     sampled_idx = sample_word_idx()
+#     word_batch = word_embeddings[sampled_idx, :]
+#     return word_batch
 
 def get_kernels(re, ri, wi=5, we=30, sigmaE = 3):
     k_exc = np.zeros([2*re+1, 2*re+1])
