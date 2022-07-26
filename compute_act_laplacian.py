@@ -39,18 +39,25 @@ def get_neuron_shape(x):
     return (y, y)
 
 ri = int(param['ri'])
+print("ri = " +str(ri))
 re = int(param['re'])
+print("re = " +str(re))
 wi = int(param['wi'])
+print("wi = " +str(wi))
 we = int(param['we'])
+print("we = " +str(we))
 leaky = wi + we
 input_dim = 97
 neuron_shape = get_neuron_shape(int(param['neuron_shape']))
+print("neuron_shape = " +str(neuron_shape))
 gradient_steps = int(param['gradient_steps'])
 
 lr_act = float(param['lr_act'])
+print("lr_act = " +str(lr_act))
 lr_codebook = float(param['lr_codebook'])
 l0_target = float(param['l0_target'])
 threshold = float(param['threshold'])
+print("threshold = " +str(threshold))
 
 #################################
 # Utils
@@ -174,6 +181,26 @@ max_act_fit = cp.asarray(50)
 threshold = threshold
 eps = cp.asarray(5e-3)
 
+def get_kernels_sum(re, ri, wi=5, we=30, sigmaE = 3):
+    k_exc = cp.zeros([2*re+1, 2*re+1])
+    k_inh = cp.zeros([2*ri+1, 2*ri+1])
+    for i in range(2*re+1):
+        for j in range(2*re+1):
+            # i row, j column
+            distsq = (i-re)**2+(j-re)**2
+            k_exc[i,j] = cp.exp(- distsq/2/sigmaE) * (distsq <= re**2)
+    sum_exc = cp.sum(k_exc)
+    k_exc = we * k_exc / sum_exc
+    for i in range(2*ri+1):
+        for j in range(2*ri+1):
+            # i row, j column
+            distsq = (i-ri)**2+(j-ri)**2
+            k_inh[i,j] = (distsq <= ri**2)
+    sum_inh = cp.sum(k_inh)
+    k_inh = wi * k_inh / sum_inh
+    return k_exc, k_inh, sum_exc, sum_inh
+
+k_exc, k_inh, sum_exc, sum_inh = get_kernels_sum(re, ri)
 
 def get_laplacian(n, r1, r2, wi, we, sigmaE = 3):
     assert r1 < r2
@@ -191,22 +218,24 @@ def get_laplacian(n, r1, r2, wi, we, sigmaE = 3):
         for j in range(n):
             # i row, j column
             distsq = find_distsq(i,j)
-            We[i,j] = - we * cp.exp(- distsq/2/sigmaE) * (distsq <= r1sq)
-        We[i] = we * We[i] / -cp.sum(We[i])
+            We[i,j] = - cp.exp(- distsq/2/sigmaE) * (distsq <= r1sq)
+        We[i] = we * We[i] / sum_exc
     for i in range(n):
         for j in range(n):
             distsq = find_distsq(i,j)
-            Wi[i,j] = wi * (distsq <= r2sq)
-        Wi[i] = wi * Wi[i] / cp.sum(Wi[i])
+            Wi[i,j] = (distsq <= r2sq)
+        Wi[i] = wi * Wi[i] / sum_inh
     W = We + Wi
-    cp.fill_diagonal(W, leaky)
+    #cp.fill_diagonal(W, leaky)
+    for i in range(n):
+        W[i][i] += leaky
     return W
 
 laplacian = get_laplacian(neuron_shape[0]*neuron_shape[1], r1 = re, r2 = ri, wi=wi, we=we)
 
 import matrix
 def perceive_to_get_stimulus(word_batch, codebook):
-    stimulus = matrix.multiply(word_batch, codebook)  # word_batch = this_X = (256, 97), code_book = (97, 400)
+    stimulus = cp.dot(word_batch, codebook)  # word_batch = this_X = (256, 97), code_book = (97, 400)
     return stimulus   # shape: (256, 400)
 
 def stimulate(stimulus):  # stimulus: (256, 20, 20)
@@ -215,9 +244,16 @@ def stimulate(stimulus):  # stimulus: (256, 20, 20)
     for t in range(int(max_act_fit)):
         exc_act_tm1 = cp.copy(exc_act)
 
-        exc_act = exc_act + lr_act * (cp.asarray(stimulus) - cp.asarray(matrix.right_multiply(exc_act, laplacian)))
+        #print("exc_act1 = " + str(exc_act))
+        s = cp.dot(exc_act, laplacian)
+
+        #print("delta_a = "+str(s))
+
+        exc_act = exc_act + lr_act * (cp.asarray(stimulus) - cp.asarray(s))
 
         exc_act = cp.maximum(exc_act - threshold, 0) - cp.maximum(-exc_act - threshold, 0)
+
+        #print("exc_act = " + str(exc_act))
 
         da = exc_act - exc_act_tm1
         relative_error = cp.sqrt(cp.square(da).sum()) / (eps + cp.sqrt(cp.square(exc_act_tm1).sum()))
@@ -240,7 +276,10 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 fpath = fpath_compute_act()
 mymkdir(fpath)
 Fpath = get_fpath_from_configs()
-Phi = cp.load(get_fpath_from_configs() + "codebook.npy")
+#Phi = cp.load(get_fpath_from_configs() + "codebook.npy")
+
+Phi = cp.load("codebook.npy")
+#print("codebook = " +str(Phi))
 
 emb_dim, num_units = Phi.shape
 activity = cp.zeros(shape=(num_test_vocabs, num_units))
@@ -260,6 +299,7 @@ def plot_word_activations(words, filename=''):
 
     global activity
     word_batch, wp_idx = load_test_batch(words)
+    #print("word_batch = " +str(word_batch))
     try:
         stimulus = perceive_to_get_stimulus(word_batch, Phi)
         activ = stimulate(stimulus)
@@ -271,6 +311,7 @@ def plot_word_activations(words, filename=''):
     for word in words:
         try:
             activ = activity[vocabidx[word]]
+            print("word '{}' = ".format(word)+str(activ))
         except Exception:
             print("word: {} not found".format(word))
         else:
@@ -290,9 +331,9 @@ def plot_word_activations(words, filename=''):
 
 
 if __name__ == "__main__":
-    plot_word_activations(['technology', 'microsoft', 'intel', 'ibm', 'apple', 'banana'], 'tech')
-    plot_word_activations(['universe', 'university', 'astronomy', 'college'], 'universe')
-    plot_word_activations(['monarch', 'king', 'queen', 'female', 'prince', 'princess'], 'people')
-    plot_word_activations(['cell', 'brain', 'organ', 'piano'], 'biology')
-
+    # plot_word_activations(['technology', 'microsoft', 'intel', 'ibm', 'apple', 'banana'], 'tech')
+    # plot_word_activations(['universe', 'university', 'astronomy', 'college'], 'universe')
+    # plot_word_activations(['monarch', 'king', 'queen', 'female', 'prince', 'princess'], 'people')
+    # plot_word_activations(['cell', 'brain', 'organ', 'piano'], 'biology')
+    plot_word_activations(['apple'],'apple_test')
 

@@ -39,18 +39,28 @@ def get_neuron_shape(x):
     return (y, y)
 
 ri = int(param['ri'])
+print("ri = " +str(ri))
 re = int(param['re'])
+print("re = " +str(re))
 wi = int(param['wi'])
+print("wi = " +str(wi))
 we = int(param['we'])
+print("we = " +str(we))
 leaky = wi + we
 input_dim = 97
 neuron_shape = get_neuron_shape(int(param['neuron_shape']))
+print("neuron_shape = " +str(neuron_shape))
+side_length = neuron_shape[0]
 gradient_steps = int(param['gradient_steps'])
 
 lr_act = float(param['lr_act'])
+print("lr_act = " +str(lr_act))
 lr_codebook = float(param['lr_codebook'])
 l0_target = float(param['l0_target'])
 threshold = float(param['threshold'])
+print("threshold = " +str(threshold))
+
+sigmaE = 3
 
 #################################
 # Utils
@@ -71,23 +81,6 @@ elif get_argsprocessor() == "GPU":
 plt.rcParams['figure.figsize'] = (8, 6)  # set default size of plots
 plt.rcParams['image.interpolation'] = 'nearest'
 
-def get_kernels(re, ri, wi=5, we=30, sigmaE = 3):
-    k_exc = cp.zeros([2*re+1, 2*re+1])
-    k_inh = cp.zeros([2*ri+1, 2*ri+1])
-    for i in range(2*re+1):
-        for j in range(2*re+1):
-            # i row, j column
-            distsq = (i-re)**2+(j-re)**2
-            k_exc[i,j] = cp.exp(- distsq/2/sigmaE) * (distsq <= re**2)
-    k_exc = we * k_exc / cp.sum(k_exc)
-    for i in range(2*ri+1):
-        for j in range(2*ri+1):
-            # i row, j column
-            distsq = (i-ri)**2+(j-ri)**2
-            k_inh[i,j] = (distsq <= ri**2)
-    k_inh = wi * k_inh / cp.sum(k_inh)
-    return k_exc, k_inh
-
 def mymkdir(fpath):
     if not os.path.exists(fpath):
         os.makedirs(fpath)
@@ -97,7 +90,7 @@ def get_fpath_from_configs():
         re, ri, we, wi, lr_codebook, lr_act, l0_target, threshold)
 
 def fpath_compute_act():
-    return "../result/row{}_compute_act_convolve/".format(get_argsrow())
+    return "../result/row{}_compute_act_laplacian_new/".format(get_argsrow())
 
 def plot_colortable(colors, text_on=True):
     # ref: https://matplotlib.org/stable/gallery/color/named_colors.html#sphx-glr-gallery-color-named-colors-py
@@ -183,11 +176,7 @@ def load_test_batch(words):
 #####################################
 # Algorithms to update activations
 #####################################
-exck, inhk = get_kernels(re = re, ri = ri, we = we, wi = wi)
-#print("exck = " +str(exck))
 
-exck = cp.expand_dims(cp.asarray(exck), axis = 0)
-inhk = cp.expand_dims(cp.asarray(inhk), axis = 0)
 lr_act = cp.asarray(lr_act)
 l0_target = cp.asarray(l0_target)
 leaky = cp.asarray(leaky)
@@ -195,33 +184,199 @@ max_act_fit = cp.asarray(50)
 threshold = threshold
 eps = cp.asarray(5e-3)
 
-#import convolve_by_python
+#######################
+# parallel algorithm
+#######################
+
+#####################################
+# Compute num_E_nbs and num_I_nbs
+#####################################
+
+def get_num_nbs(r):
+    count = 0
+    for i in range((r+1)**2):
+        xi = i // (r+1)
+        yi = i % (r+1)
+        distsq = xi**2 + yi**2
+        if distsq <= r**2:
+            count+=1
+
+    num_nbs = (count-(r+1))*4 +1
+    return num_nbs
+
+num_E_nbs = get_num_nbs(re)  # 29
+
+num_I_nbs = get_num_nbs(ri)  # 81
+
+
+#print("num_E_nbs = " + str(num_E_nbs))
+#print("num_I_nbs = " +str(num_I_nbs))
+
+#####################################
+# compute index set of each neurons
+#####################################
+
+def get_struct(r):
+    rsq = r**2
+    l = cp.zeros(2*r+1)
+    for i in range(2*r+1):
+        count = 0
+        for j in range(2*r+1):
+            distsq = (i - r) ** 2 + (j - r) ** 2
+            if distsq <= rsq:
+                count += 1
+        l[i] = count
+    return l
+
+def get_index_from_position(xi, yi, xj, yj, r):
+    r = int(r)
+    xi = int(xi)
+    yi = int(yi)
+    xj = int(xj)
+    yj = int(yj)
+    l = get_struct(r)
+    core_index = (get_num_nbs(r)-1)/2
+    if yi == yj:
+        index = core_index + (xj - xi)
+        index = int(index)
+        return index
+    else:
+        diff = 0
+        for i in range(int(abs(yj - yi)-1)):
+            diff += l[r-i-1]
+        if (yi > yj):
+            index = core_index - (l[r]-1)/2 - diff - (l[r-(yi - yj)]+1)/2 + (xj - xi)
+            index = int(index)
+            return index
+        elif (yi < yj):
+            index = core_index + (l[r]-1)/2 + diff + (l[r-(yi - yj)]+1)/2 + (xj - xi)
+            index = int(index)
+            return index
+
+
+def compute_indexset(r, num_nbs):
+    set = cp.zeros(shape=(neuron_shape[0]*neuron_shape[1], num_nbs))
+    set = set.astype(int)
+    set.fill(neuron_shape[0]*neuron_shape[1])
+    #print(set)
+    for i in range(neuron_shape[0]*neuron_shape[1]):
+        xi = i // side_length
+        yi = i % side_length
+        for j in range(neuron_shape[0]*neuron_shape[1]):
+            xj = j//side_length
+            yj = j % side_length
+            distsq = (xi - xj)**2 + (yi - yj)**2
+            if distsq <= r**2:
+                index = get_index_from_position(xi, yi, xj, yj, r)
+                index = int(index)
+                #print("index = " + str(index))
+                set[i][int(index)] = j
+                #print(set[i][index])
+    return set
+
+N_E = compute_indexset(re, num_E_nbs)
+N_I = compute_indexset(ri, num_I_nbs)
+
+#print("N_E = " +str(N_E))
+# print("N_I = " +str(N_I))
+
+#####################################
+# compute weight kernels W_E and W_I
+#####################################
+W_E = cp.zeros(num_E_nbs)
+W_I = cp.zeros(num_I_nbs)
+
+count_E = 0
+for i in range((2*re+1)**2):
+    xi = i // (2*re+1)
+    yi = i % (2*re+1)
+    distsq = (xi - re)**2 + (yi - re)**2
+    if distsq <= re**2:
+        W_E[count_E] = cp.exp(- distsq/2/sigmaE)
+        count_E += 1
+
+#print("count_E = " + str(count_E))
+W_E = we * W_E / cp.sum(W_E)
+#print("W_E = " +str(W_E))
+
+count_I = 0
+for i in range((2*ri+1)**2):
+    xi = i // (2 * ri + 1)
+    yi = i % (2 * ri + 1)
+    distsq = (xi - ri) ** 2 + (yi - ri) ** 2
+    if distsq <= ri**2:
+        W_I[count_I] = 1
+        count_I += 1
+
+#print("count_I = " + str(count_I))
+W_I = wi * W_I / cp.sum(W_I)
+#print("W_I = " +str(W_I))
+
+###########################
+# Update algorithms
+###########################
+
+def exc_act_update(exc_act_dummy, inh_act_dummy):
+    b = cp.zeros(shape=(bs, neuron_shape[0] * neuron_shape[1]))
+    for k in range(bs):
+        r = cp.zeros(neuron_shape[0]*neuron_shape[1])
+        for i in range(neuron_shape[0]*neuron_shape[1]):
+            r[i] = - leaky * exc_act_dummy[k][i]
+            for j in range(num_E_nbs):
+                r[i] += W_E[j] * exc_act_dummy[k][N_E[i][j]]
+            for j in range(num_I_nbs):
+                r[i] -= W_I[j] * inh_act_dummy[k][N_I[i][j]]
+
+            b[k][i] = r[i]
+
+    return b
+
+def inh_act_update(exc_act_dummy, inh_act_dummy):
+    b = cp.zeros(shape=(bs, neuron_shape[0] * neuron_shape[1]))
+    for k in range(bs):
+        r = cp.zeros(neuron_shape[0]*neuron_shape[1])
+        for i in range(neuron_shape[0]*neuron_shape[1]):
+            r[i] = - leaky * inh_act_dummy[k][i]
+            for j in range(num_E_nbs):
+                r[i] += W_E[j] * exc_act_dummy[k][N_E[i][j]]
+
+            b[k][i] = r[i]
+
+    return b
+
 
 def perceive_to_get_stimulus(word_batch, codebook):
-    stimulus = cp.dot(word_batch, codebook).reshape((word_batch.shape[0], neuron_shape[0], neuron_shape[1]))  # word_batch = this_X = (256, 97), code_book = (97, 400)
+    stimulus = cp.dot(word_batch, codebook)  # word_batch = this_X = (256, 97), code_book = (97, 400)
     return stimulus   # shape: (256, 400)
 
 def stimulate(stimulus):  # stimulus: (256, 20, 20)
     global exc_act
+    global exc_act_dummy
     global inh_act
+    global inh_act_dummy
     for t in range(int(max_act_fit)):
         exc_act_tm1 = cp.copy(exc_act)
-        exc_input = convolve(exc_act, exck, mode="same")  # (256, 20, 20)
-        inh_input = convolve(inh_act, inhk, mode="same")
-        #inh_input = convolve(exc_act, inhk, mode="same")
+        #print("#######################################\n")
+        #print("activation_dummy0 = " +str(activation_dummy))
+        #print("exc_act0 = " +str(exc_act))
 
-        # if t == int(max_act_fit) - 1:
-        #     print(exc_input[0])
+        delta_a_exc = exc_act_update(exc_act_dummy, inh_act_dummy)
+        delta_a_inh = inh_act_update(exc_act_dummy, inh_act_dummy)
+        #print("activation_dummy1 = " + str(activation_dummy))
+        #print("delta_a = " +str(delta_a))
 
-        #exc_input = convolve_by_python.conv3d(exc_act, exck)  # (256, 20, 20)
-        #inh_input = convolve_by_python.conv3d(inh_act, inhk)
+        exc_act = exc_act + lr_act * (cp.asarray(stimulus) + cp.asarray(delta_a_exc))  # dimension problem
+        inh_act = inh_act + lr_act * (cp.asarray(delta_a_inh))
 
-        exc_act = exc_act + lr_act * (- leaky * exc_act + stimulus + exc_input - inh_input)
-        inh_act = inh_act + lr_act * (- leaky * inh_act + exc_input)
-
-        # Soft threshold
         exc_act = cp.maximum(exc_act - threshold, 0) - cp.maximum(-exc_act - threshold, 0)
         inh_act = cp.maximum(inh_act - threshold, 0) - cp.maximum(-inh_act - threshold, 0)
+
+        #print("exc_act1 = " + str(exc_act))
+        #print("#######################################\n")
+        for i in range(bs):
+            for j in range(neuron_shape[0]*neuron_shape[1]):
+                exc_act_dummy[i][j] = exc_act[i][j]
+                inh_act_dummy[i][j] = inh_act[i][j]
 
         da = exc_act - exc_act_tm1
         relative_error = cp.sqrt(cp.square(da).sum()) / (eps + cp.sqrt(cp.square(exc_act_tm1).sum()))
@@ -230,7 +385,7 @@ def stimulate(stimulus):  # stimulus: (256, 20, 20)
         return exc_act
     else:
         print("error = " + str(relative_error))
-        print("exc_act = "+ str(exc_act))
+        print("exc_act = " + str(exc_act))
         print("Relative error end with {:.4f} and doesn't converge within the max fit steps".format(exc_act))
         return exc_act
 
@@ -244,7 +399,8 @@ from mpl_toolkits.axes_grid1 import make_axes_locatable
 fpath = fpath_compute_act()
 mymkdir(fpath)
 Fpath = get_fpath_from_configs()
-Phi = cp.load(get_fpath_from_configs() + "codebook.npy")
+
+Phi = cp.load("codebook.npy")
 
 emb_dim, num_units = Phi.shape
 activity = cp.zeros(shape=(num_test_vocabs, num_units))
@@ -258,16 +414,20 @@ def plot_word_activations(words, filename=''):
     global bs
     bs = len(words)
     global exc_act
+    global exc_act_dummy
     global inh_act
-    exc_act = cp.zeros(shape=(bs, neuron_shape[0], neuron_shape[1]))  # shape should be (bs, neuron_shape)!
-    inh_act = cp.zeros(shape=(bs, neuron_shape[0], neuron_shape[1]))
+    global inh_act_dummy
+    exc_act_dummy = cp.zeros(shape = (bs, neuron_shape[0]*neuron_shape[1] + 1))
+    exc_act = cp.zeros(shape=(bs, neuron_shape[0] * neuron_shape[1]))  # shape should be (bs, neuron_shape)!
+    inh_act_dummy = cp.zeros(shape = (bs, neuron_shape[0]*neuron_shape[1] + 1))
+    inh_act = cp.zeros(shape=(bs, neuron_shape[0]*neuron_shape[1]))
 
     global activity
     word_batch, wp_idx = load_test_batch(words)
     try:
         stimulus = perceive_to_get_stimulus(word_batch, Phi)
         activ = stimulate(stimulus)
-        activ = activ.reshape([bs, num_units])
+        #activ = activ.reshape([bs, num_units])
         activity[wp_idx, :] = activ
     except RuntimeError as e:
         print(e)
@@ -275,10 +435,11 @@ def plot_word_activations(words, filename=''):
     for word in words:
         try:
             activ = activity[vocabidx[word]]
-            print("word '{}' = ".format(word)+str(activ))
+            print("word '{}' = ".format(word) + str(activ))
         except Exception:
             print("word: {} not found".format(word))
         else:
+            #activ = cp.delete(activ, [1600], axis = 1)  # delete the last dummy index
             fig, ax = plt.subplots(figsize=(5, 5))
             l0norm = numpy.abs(activ).max()
             im = ax.imshow(activ.reshape(neuron_shape[0], neuron_shape[1]),
@@ -291,6 +452,7 @@ def plot_word_activations(words, filename=''):
             if len(filename) > 0:
                 plt.savefig(fpath + '%s_%d.pdf' % (filename, i))
                 i = i + 1
+            #plt.show()
 
 
 
@@ -299,6 +461,6 @@ if __name__ == "__main__":
     plot_word_activations(['universe', 'university', 'astronomy', 'college'], 'universe')
     plot_word_activations(['monarch', 'king', 'queen', 'female', 'prince', 'princess'], 'people')
     plot_word_activations(['cell', 'brain', 'organ', 'piano'], 'biology')
-    #plot_word_activations(['brain'], 'apple_test')
+    #plot_word_activations(['brain'],'apple_test')
 
 

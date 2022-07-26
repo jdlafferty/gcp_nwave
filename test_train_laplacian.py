@@ -15,27 +15,28 @@ we = 30
 leaky = wi + we
 bs = 256
 imbed_dim = 97
-neuron_shape = (40, 40)
+neuron_shape = (60, 60)
 lr_act = 0.01
 lr_Phi = 0.01
 l0_target = 0.1
 threshold = 0.01
 initial_step = 0
-gradient_steps = 150000
+gradient_steps = 100000
 sigmaE = 3
 max_act_fit = 50
 eps = 5e-3
 
-
-# word_freq = numpy.load("../data/googleNgram/1gramSortedFreq.npy")
-# num_train_vocabs = word_freq.shape[0]
-# print("num_train_vocabs = " + str(num_train_vocabs))
-# SUBSAMPLE_SIZE = numpy.asarray(4096)
-
-num_train_vocabs = 55529
+word_freq = numpy.load("../data/googleNgram/1gramSortedFreq.npy")
+num_train_vocabs = word_freq.shape[0]
+print("num_train_vocabs = " + str(num_train_vocabs))
+SUBSAMPLE_SIZE = numpy.asarray(4096)
 
 def load_train_batch():
-    sampled_idx = np.random.choice(num_train_vocabs, bs, replace=False)
+    a = []
+    for i in range(55529):
+        a.append(i)
+    a = np.asarray(a)
+    sampled_idx = np.random.choice(a, bs, replace=False)
     word_batch = word_embeddings[sampled_idx,:]
     return word_batch
 
@@ -52,7 +53,7 @@ def load_train_batch():
 #     word_batch = word_embeddings[sampled_idx, :]
 #     return word_batch
 
-def get_kernels(re, ri, wi=5, we=30, sigmaE = 3):
+def get_kernels_sum(re, ri, wi=5, we=30, sigmaE = 3):
     k_exc = np.zeros([2*re+1, 2*re+1])
     k_inh = np.zeros([2*ri+1, 2*ri+1])
     for i in range(2*re+1):
@@ -60,18 +61,18 @@ def get_kernels(re, ri, wi=5, we=30, sigmaE = 3):
             # i row, j column
             distsq = (i-re)**2+(j-re)**2
             k_exc[i,j] = np.exp(- distsq/2/sigmaE) * (distsq <= re**2)
-    k_exc = we * k_exc / np.sum(k_exc)
+    sum_exc = np.sum(k_exc)
+    k_exc = we * k_exc / sum_exc
     for i in range(2*ri+1):
         for j in range(2*ri+1):
             # i row, j column
             distsq = (i-ri)**2+(j-ri)**2
             k_inh[i,j] = (distsq <= ri**2)
-    k_inh = wi * k_inh / np.sum(k_inh)
-    return k_exc, k_inh
+    sum_inh = np.sum(k_inh)
+    k_inh = wi * k_inh / sum_inh
+    return k_exc, k_inh, sum_exc, sum_inh
 
-k_exc, k_inh = get_kernels(re, ri, wi, we, sigmaE)
-exck = np.expand_dims(np.asarray(k_exc), axis = 0)
-inhk = np.expand_dims(np.asarray(k_inh), axis = 0)
+k_exc, k_inh, sum_exc, sum_inh = get_kernels_sum(re, ri)
 
 def get_laplacian(n, r1, r2, wi, we, sigmaE = 3):
     assert r1 < r2
@@ -89,15 +90,17 @@ def get_laplacian(n, r1, r2, wi, we, sigmaE = 3):
         for j in range(n):
             # i row, j column
             distsq = find_distsq(i,j)
-            We[i,j] = - we * np.exp(- distsq/2/sigmaE) * (distsq <= r1sq)
-        We[i] = we * We[i] / -np.sum(We[i])
+            We[i,j] = - np.exp(- distsq/2/sigmaE) * (distsq <= r1sq)
+        We[i] = we * We[i] / sum_exc
     for i in range(n):
         for j in range(n):
             distsq = find_distsq(i,j)
-            Wi[i,j] = wi * (distsq <= r2sq)
-        Wi[i] = wi * Wi[i] /np.sum(Wi[i])
+            Wi[i,j] = (distsq <= r2sq)
+        Wi[i] = wi * Wi[i] / sum_inh
     W = We + Wi
-    np.fill_diagonal(W, we+wi)
+    #cp.fill_diagonal(W, leaky)
+    for i in range(n):
+        W[i][i] += leaky
     return W
 
 laplacian = get_laplacian(neuron_shape[0]*neuron_shape[1], r1 = re, r2 = ri, wi=wi, we=we)
@@ -188,7 +191,7 @@ for i in tbar:
                                      (l2l, 100 * l0l, threshold))
         tbar.refresh()
 
-np.save("codebook.npy", Phi)
+np.save("codebook_laplacian.npy", Phi)
 
 ################
 #plot phi

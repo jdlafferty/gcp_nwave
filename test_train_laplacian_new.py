@@ -1,7 +1,7 @@
 import numpy
-import cupy as np
-from cusignal.convolution.convolve import convolve
-#from scipy.signal import convolve
+import numpy as np
+#from cusignal.convolution.convolve import convolve
+from scipy.signal import convolve
 from tqdm import trange
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
@@ -13,19 +13,19 @@ re = 3
 wi = 5
 we = 30
 leaky = wi + we
-bs = 256
+bs = 128
 imbed_dim = 97
-neuron_shape = (40, 40)
+neuron_shape = (20, 20)
+side_length = neuron_shape[0]
 lr_act = 0.01
 lr_Phi = 0.01
 l0_target = 0.1
 threshold = 0.01
 initial_step = 0
-gradient_steps = 100000
+gradient_steps = 25000
 sigmaE = 3
 max_act_fit = 50
 eps = 5e-3
-
 
 word_freq = numpy.load("../data/googleNgram/1gramSortedFreq.npy")
 num_train_vocabs = word_freq.shape[0]
@@ -33,7 +33,11 @@ print("num_train_vocabs = " + str(num_train_vocabs))
 SUBSAMPLE_SIZE = numpy.asarray(4096)
 
 def load_train_batch():
-    sampled_idx = np.random.choice(55529, bs, replace=False)
+    a = []
+    for i in range(55529):
+        a.append(i)
+    a = np.asarray(a)
+    sampled_idx = np.random.choice(a, bs, replace=False)
     word_batch = word_embeddings[sampled_idx,:]
     return word_batch
 
@@ -50,73 +54,171 @@ def load_train_batch():
 #     word_batch = word_embeddings[sampled_idx, :]
 #     return word_batch
 
-def get_kernels(re, ri, wi=5, we=30, sigmaE = 3):
-    k_exc = np.zeros([2*re+1, 2*re+1])
-    k_inh = np.zeros([2*ri+1, 2*ri+1])
-    for i in range(2*re+1):
-        for j in range(2*re+1):
-            # i row, j column
-            distsq = (i-re)**2+(j-re)**2
-            k_exc[i,j] = np.exp(- distsq/2/sigmaE) * (distsq <= re**2)
-    k_exc = we * k_exc / np.sum(k_exc)
-    for i in range(2*ri+1):
-        for j in range(2*ri+1):
-            # i row, j column
-            distsq = (i-ri)**2+(j-ri)**2
-            k_inh[i,j] = (distsq <= ri**2)
-    k_inh = wi * k_inh / np.sum(k_inh)
-    return k_exc, k_inh
+########################################
 
-k_exc, k_inh = get_kernels(re, ri, wi, we, sigmaE)
-exck = np.expand_dims(np.asarray(k_exc), axis = 0)
-inhk = np.expand_dims(np.asarray(k_inh), axis = 0)
+def get_num_nbs(r):
+    count = 0
+    for i in range((r+1)**2):
+        xi = i // (r+1)
+        yi = i % (r+1)
+        distsq = xi**2 + yi**2
+        if distsq <= r**2:
+            count+=1
 
-def get_laplacian(n, r1, r2, wi, we, sigmaE = 3):
-    assert r1 < r2
-    r1sq = r1**2
-    r2sq = r2**2
-    side_length = int(np.sqrt(n))
-    def find_distsq(i,j):
-        xi, yi = i//side_length, i%side_length
-        xj, yj = j//side_length, j%side_length
-        return (xi-xj)**2+(yi-yj)**2
-    # construct the W matrix
-    We = np.zeros(shape = (n,n))
-    Wi = np.zeros(shape = (n,n))
-    for i in range(n):
-        for j in range(n):
-            # i row, j column
-            distsq = find_distsq(i,j)
-            We[i,j] = - we * np.exp(- distsq/2/sigmaE) * (distsq <= r1sq)
-        We[i] = we * We[i] / -np.sum(We[i])
-    for i in range(n):
-        for j in range(n):
-            distsq = find_distsq(i,j)
-            Wi[i,j] = wi * (distsq <= r2sq)
-        Wi[i] = wi * Wi[i] /np.sum(Wi[i])
-    W = We + Wi
-    np.fill_diagonal(W, we+wi)
-    return W
+    num_nbs = (count-(r+1))*4 +1
+    return num_nbs
 
-laplacian = get_laplacian(neuron_shape[0]*neuron_shape[1], r1 = re, r2 = ri, wi=wi, we=we)
+num_E_nbs = get_num_nbs(re)  # 29
+
+num_I_nbs = get_num_nbs(ri)  # 81
 
 
-def stimulate(stimulus, exc_act, inh_act):  # stimulus: (256, 20, 20)
+#print("num_E_nbs = " + str(num_E_nbs))
+#print("num_I_nbs = " +str(num_I_nbs))
+
+#####################################
+# compute index set of each neurons
+#####################################
+
+def get_struct(r):
+    rsq = r**2
+    l = np.zeros(2*r+1)
+    for i in range(2*r+1):
+        count = 0
+        for j in range(2*r+1):
+            distsq = (i - r) ** 2 + (j - r) ** 2
+            if distsq <= rsq:
+                count += 1
+        l[i] = count
+    return l
+
+def get_index_from_position(xi, yi, xj, yj, r):
+    r = int(r)
+    xi = int(xi)
+    yi = int(yi)
+    xj = int(xj)
+    yj = int(yj)
+    l = get_struct(r)
+    core_index = (get_num_nbs(r)-1)/2
+    if yi == yj:
+        index = core_index + (xj - xi)
+        index = int(index)
+        return index
+    else:
+        diff = 0
+        for i in range(int(abs(yj - yi)-1)):
+            diff += l[r-i-1]
+        if (yi > yj):
+            index = core_index - (l[r]-1)/2 - diff - (l[r-(yi - yj)]+1)/2 + (xj - xi)
+            index = int(index)
+            return index
+        elif (yi < yj):
+            index = core_index + (l[r]-1)/2 + diff + (l[r-(yi - yj)]+1)/2 + (xj - xi)
+            index = int(index)
+            return index
+
+
+def compute_indexset(r, num_nbs):
+    set = np.zeros(shape=(neuron_shape[0]*neuron_shape[1], num_nbs))
+    set = set.astype(int)
+    set.fill(neuron_shape[0]*neuron_shape[1])
+    #print(set)
+    for i in range(neuron_shape[0]*neuron_shape[1]):
+        xi = i // side_length
+        yi = i % side_length
+        for j in range(neuron_shape[0]*neuron_shape[1]):
+            xj = j//side_length
+            yj = j % side_length
+            distsq = (xi - xj)**2 + (yi - yj)**2
+            if distsq <= r**2:
+                index = get_index_from_position(xi, yi, xj, yj, r)
+                index = int(index)
+                #print("index = " + str(index))
+                set[i][int(index)] = j
+                #print(set[i][index])
+    return set
+
+N_E = compute_indexset(re, num_E_nbs)
+N_I = compute_indexset(ri, num_I_nbs)
+
+#print("N_E = " +str(N_E))
+# print("N_I = " +str(N_I))
+
+#####################################
+# compute weight kernels W_E and W_I
+#####################################
+W_E = np.zeros(num_E_nbs)
+W_I = np.zeros(num_I_nbs)
+
+count_E = 0
+for i in range((2*re+1)**2):
+    xi = i // (2*re+1)
+    yi = i % (2*re+1)
+    distsq = (xi - re)**2 + (yi - re)**2
+    if distsq <= re**2:
+        W_E[count_E] = np.exp(- distsq/2/sigmaE)
+        count_E += 1
+
+#print("count_E = " + str(count_E))
+W_E = we * W_E / np.sum(W_E)
+#print("W_E = " +str(W_E))
+
+count_I = 0
+for i in range((2*ri+1)**2):
+    xi = i // (2 * ri + 1)
+    yi = i % (2 * ri + 1)
+    distsq = (xi - ri) ** 2 + (yi - ri) ** 2
+    if distsq <= ri**2:
+        W_I[count_I] = 1
+        count_I += 1
+
+#print("count_I = " + str(count_I))
+W_I = wi * W_I / np.sum(W_I)
+#print("W_I = " +str(W_I))
+
+###########################
+# Update algorithms
+###########################
+
+def activation_update(a):
+    b = np.zeros(shape=(bs, neuron_shape[0] * neuron_shape[1]))
+    for k in range(bs):
+        r = np.zeros(neuron_shape[0]*neuron_shape[1])
+        for i in range(neuron_shape[0]*neuron_shape[1]):
+            r[i] = - leaky * a[k][i]
+            for j in range(num_E_nbs):
+                r[i] += W_E[j] * a[k][N_E[i][j]]
+            for j in range(num_I_nbs):
+                r[i] -= W_I[j] * a[k][N_I[i][j]]
+
+        for i in range(neuron_shape[0]*neuron_shape[1]):
+            a[k][i] = r[i]
+
+    for k in range(bs):
+        for n in range(neuron_shape[0]*neuron_shape[1]):
+            b[k][n] = a[k][n]
+    return b
+
+########################################
+
+def stimulate(stimulus, exc_act):  # stimulus: (256, 20, 20)
 
     for t in range(50):
         exc_act_tm1 = np.copy(exc_act)
 
-        #exc_act = exc_act + lr_act * (np.asarray(stimulus) - np.asarray(np.dot(exc_act, laplacian)))
+        delta_a = activation_update(activation_dummy)
+        # print("activation_dummy1 = " + str(activation_dummy))
+        # print("delta_a = " +str(delta_a))
 
-        exc_input = convolve(exc_act, exck, mode="same")  # (256, 20, 20)
-        inh_input = convolve(inh_act, inhk, mode="same")
+        exc_act = exc_act + lr_act * (np.asarray(stimulus) + np.asarray(delta_a))  # dimension problem
 
-        exc_act  = exc_act + lr_act * (- leaky * exc_act + stimulus + exc_input - inh_input)
-        inh_act = inh_act + lr_act * (- leaky * inh_act + exc_input)
-
-        # Soft threshold
         exc_act = np.maximum(exc_act - threshold, 0) - np.maximum(-exc_act - threshold, 0)
-        inh_act = np.maximum(inh_act - threshold, 0) - np.maximum(-inh_act - threshold, 0)
+
+        # print("exc_act1 = " + str(exc_act))
+        # print("#######################################\n")
+        for i in range(bs):
+            for j in range(neuron_shape[0] * neuron_shape[1]):
+                activation_dummy[i][j] = exc_act[i][j]
 
         da = exc_act - exc_act_tm1
         relative_error = np.sqrt(np.square(da).sum()) / (eps + np.sqrt(np.square(exc_act_tm1).sum()))
@@ -144,14 +246,16 @@ tbar = trange(initial_step, initial_step + gradient_steps, desc='Training', leav
 for i in tbar:
     word_batch = load_train_batch()  #this_X : 256 * 97
 
-    stimulus = np.dot(word_batch, Phi).reshape((bs, neuron_shape[0], neuron_shape[1]))  # stimulus: (256, 20， 20)
+    stimulus = np.dot(word_batch, Phi)  # stimulus: (256, 20， 20)
     # Get neuron activity
 
-    exc_act = np.zeros(shape=(bs, neuron_shape[0], neuron_shape[1]))
-    inh_act = np.zeros(shape=(bs, neuron_shape[0], neuron_shape[1]))
+    exc_act = np.zeros(shape=(bs, neuron_shape[0]*neuron_shape[1]))
+    inh_act = np.zeros(shape=(bs, neuron_shape[0]*neuron_shape[1]))
 
-    activation = stimulate(stimulus, exc_act, inh_act)
-    activation = activation.reshape(bs, neuron_shape[0] * neuron_shape[1])
+    activation_dummy = np.zeros(shape = (bs, neuron_shape[0]*neuron_shape[1]+1))
+
+    activation = stimulate(stimulus, exc_act)
+    #activation = activation.reshape(bs, neuron_shape[0] * neuron_shape[1])
 
     # Neuron model evolve and reset
     dthreshold = np.mean((np.abs(activation) > 1e-4)) - l0_target
@@ -186,7 +290,7 @@ for i in tbar:
                                      (l2l, 100 * l0l, threshold))
         tbar.refresh()
 
-np.save("codebook.npy", Phi)
+np.save("codebook_laplacian.npy", Phi)
 
 ################
 #plot phi

@@ -17,7 +17,7 @@ float** copy_matrix(int row, int col, float** m) {
         copy[i] = malloc(sizeof(float) * col);
     }
 
-    for (int i = 0; i < row; i++) { 
+    for (int i = 0; i < row; i++) {
         for (int j = 0; j < col; j++) {
             copy[i][j] = m[i][j];
         }
@@ -32,7 +32,7 @@ float** sample_matrix(int row, int col, int sample_size, float** m) {
         sample[i] = malloc(sizeof(float) * col);
     }
 
-    for (int i = 0; i < sample_size; i++) { 
+    for (int i = 0; i < sample_size; i++) {
         int m_row = rand() % row;
         for (int j = 0; j < col; j++) {
             sample[i][j] = m[m_row][j];
@@ -42,20 +42,20 @@ float** sample_matrix(int row, int col, int sample_size, float** m) {
     return sample;
 }
 
-// float** sample_matrix1(int row, int col, int sample_size, float** m) {
-//     float** sample = malloc(sizeof(float*) * sample_size);
-//     for (int i = 0; i < sample_size; i++) {
-//         sample[i] = malloc(sizeof(float) * col);
-//     }
+ float** sample_matrix1(int row, int col, int sample_size, float** m) {
+     float** sample = malloc(sizeof(float*) * sample_size);
+     for (int i = 0; i < sample_size; i++) {
+         sample[i] = malloc(sizeof(float) * col);
+     }
 
-//     for (int i = 0; i < sample_size; i++) { 
-//         for (int j = 0; j < col; j++) {
-//             sample[i][j] = m[i][j];
-//         }
-//     }
+     for (int i = 0; i < sample_size; i++) {
+         for (int j = 0; j < col; j++) {
+             sample[i][j] = m[i][j];
+         }
+     }
 
-//     return sample;
-// }
+     return sample;
+ }
 
 float** malloc_matrix(int row, int col) {
     float** result = malloc(sizeof(float*) * row);
@@ -73,16 +73,23 @@ void free_matrix(int row, float ** m) {
     free(m);
 }
 
-void print_vector(int l, float* v) {
+void print_float_vector(int l, float* v) {
     for (int i = 0; i < l; i++) {
         printf("%f ", v[i]);
     }
     printf("\n");
 }
 
+void print_int_vector(int l, int* v){
+    for (int i = 0; i < l; i++) {
+        printf("%d ", v[i]);
+    }
+    printf("\n");
+}
+
 float** transpose(int row, int col, float** a) {
     float** b = malloc(sizeof(float*) * col);
-     
+
     for (int j = 0; j < col; j++) {
         b[j] = malloc(sizeof(float) * row);
     }
@@ -98,7 +105,7 @@ float** transpose(int row, int col, float** a) {
 
 float** multiply(int r1, int c1, int c2, float** a, float** b) {
     float** c = malloc(sizeof(float*) * r1);
-     
+
     for (int i = 0; i < r1; i++) {
         c[i] = malloc(sizeof(float) * c2);
     }
@@ -169,6 +176,21 @@ void scalar_matrix(int r, int c, float v, float** a) {
         for (int j = 0; j < c; j++) {
             a[i][j] = v * a[i][j];
         }
+    }
+}
+
+void square_matrix(int r, int c, float** a) {
+
+    for (int i = 0; i < r; i++) {
+        for (int j = 0; j < c; j++) {
+            a[i][j] = a[i][j] * a[i][j];
+        }
+    }
+}
+
+void sqrt_vec(int length, float* v){
+    for (int i =0; i<length;i++){
+        v[i] = sqrt(v[i]);
     }
 }
 
