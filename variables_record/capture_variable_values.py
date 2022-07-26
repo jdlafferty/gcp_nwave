@@ -6,7 +6,8 @@ from scipy.signal import convolve
 from tqdm import trange
 
 
-
+# store the index
+idx = []
 # store the floating points
 f = []
 # store the array and matrix
@@ -27,20 +28,18 @@ lr_Phi = 0.01
 l0_target = 0.1
 threshold = 0.01
 initial_step = 0
-gradient_steps = 2500
+gradient_steps = 5000
 sigmaE = 3
 max_act_fit = 50
 eps = 5e-3
 
-f.extend([ri, re, wi, we, leaky, bs, imbed_dim, neuron_shape[0]*neuron_shape[1], lr_act, lr_Phi, l0_target, threshold, initial_step, gradient_steps, sigmaE, max_act_fit, eps])
+# f.extend([ri, re, wi, we, leaky, bs, imbed_dim, neuron_shape[0]*neuron_shape[1], lr_act, lr_Phi, l0_target, threshold, initial_step, gradient_steps, sigmaE, max_act_fit, eps])
 
 num_train_vocabs = 55529
 
-f.append(num_train_vocabs)
-
 def load_train_batch():
     sampled_idx = np.random.choice(num_train_vocabs, bs, replace=False)
-    m.append(np.copy(sampled_idx))
+    idx.append(np.copy(sampled_idx))
     word_batch = word_embeddings[sampled_idx,:]
     # m.append(np.copy(word_batch))
     return word_batch
@@ -112,7 +111,7 @@ def get_laplacian(n, r1, r2, wi, we, sigmaE = 3):
     m.append(np.copy(W))
     return W
 
-laplacian = get_laplacian(neuron_shape[0]*neuron_shape[1], r1 = re, r2 = ri, wi=wi, we=we)
+# laplacian = get_laplacian(neuron_shape[0]*neuron_shape[1], r1 = re, r2 = ri, wi=wi, we=we)
 
 
 def stimulate(stimulus, exc_act, inh_act):  # stimulus: (256, 20, 20)
@@ -139,7 +138,7 @@ def stimulate(stimulus, exc_act, inh_act):  # stimulus: (256, 20, 20)
 
         relative_error = np.sqrt(np.square(da).sum()) / (eps + np.sqrt(np.square(exc_act_tm1).sum()))
 
-        f.append(relative_error)
+        # f.append(relative_error)
 
     # m.append(np.copy(exc_input))
     # m.append(np.copy(inh_input))
@@ -213,8 +212,8 @@ for i in tbar:
     l1l = np.abs(activation).mean()
     l2l = np.sqrt(np.square(error).sum())
 
-    if i % 100 == 0:
-        f.extend([l0l, l1l, l2l])
+    # if i % 100 == 0:
+    #     f.extend([l0l, l1l, l2l])
 
     # exc_act.fill(0)
     # inh_act.fill(0)
@@ -236,24 +235,16 @@ print("finish training")
 
 import pickle
 
-def to_dict(f, value, isMore):
+def to_dict(f):
     f_dict = {}
-
     for x in f:
         x = round(x, 5)
-        if isMore:
-            if x >= value:
-                if x not in f_dict.keys():
-                    f_dict[x] = 1
-                else:
-                    f_dict[x] += 1
-        else:
-            if x < value:
-                if x not in f_dict.keys():
-                    f_dict[x] = 1
-                else:
-                    f_dict[x] += 1
+        f_dict[x] = f_dict.get(x, 0) + 1
     return f_dict
+
+idx1 = []
+for arr in idx:
+    idx1.extend(arr.flatten().tolist())
 
 m1 = []
 for arr in m:
@@ -261,11 +252,15 @@ for arr in m:
 
 m1.extend(f)
 
-with open("value_less", "wb") as file:
-    pickle.dump(to_dict(m1, 35, False), file)
 
-with open("value_more", "wb") as file:
-    pickle.dump(to_dict(m1, 35, True), file)
+with open("index", "wb") as file:
+    pickle.dump(to_dict(idx1), file)
+print("index dumped")
+
+with open("value", "wb") as file:
+    pickle.dump(to_dict(m1), file)
 
 print("value dumped")
+
+
 

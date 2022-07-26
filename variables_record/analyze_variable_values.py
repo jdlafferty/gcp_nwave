@@ -1,25 +1,32 @@
 import pickle
 
-with open('value_less', 'rb') as f:
-    small = pickle.load(f)
-print(len(small))
+with open('index', 'rb') as f:
+    idx = pickle.load(f)
+print(len(idx))
 
-with open('value_more', 'rb') as f:
-    large = pickle.load(f)
-print(len(large))
+with open('value', 'rb') as f:
+    value = pickle.load(f)
+print(len(value))
 
 import matplotlib.pyplot as plt
 
-print(min(small.keys()))
-print(max(small.keys()))
+print(min(idx.keys()))
+print(max(idx.keys()))
 
-print(min(large.keys()))
-print(max(large.keys()))
+print(min(value.keys()))
+print(max(value.keys()))
 
-plt.hist(list(small.keys()), bins=10000)
-plt.title(f"Value smaller than 35\nmin={min(small.keys())}\nmax={max(small.keys())}")
-plt.savefig("small_value.pdf")
+plt.hist(list(idx.keys()), bins=1000)
+plt.title(f"Index range\nmin={min(idx.keys())}\nmax={max(idx.keys())}")
+plt.xlim([min(idx.keys()) - 1, max(idx.keys()) + 1])
+# plt.show()
+plt.savefig("index.pdf")
+plt.close()
 
-plt.hist(list(large.keys()), bins=10000)
-plt.title(f"Value larger than 35\nmin={min(large.keys())}\nmax={max(large.keys())}")
-plt.savefig("large_value.pdf")
+plt.hist(list(value.keys()), bins=10000)
+plt.title(f"Value range except for hyperparameters\nmin={min(value.keys())}\nmax={max(value.keys())}")
+plt.xlim([min(value.keys()) - 1, max(value.keys()) + 1])
+# plt.show()
+plt.savefig("value.pdf")
+plt.close()
+
