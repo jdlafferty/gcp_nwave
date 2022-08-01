@@ -290,11 +290,17 @@ for i in tbar:
                                      (l2l, 100 * l0l, threshold))
         tbar.refresh()
 
-np.save("codebook_laplacian.npy", Phi)
+batch = np.eye(imbed_dim)
+batch = batch - numpy.mean(batch, axis=1)
+batch = batch / numpy.std(batch, axis=1)
 
-################
-#plot phi
-################
+stimulus = np.dot(batch, Phi)
+
+exc_act1 = np.zeros(shape=(imbed_dim, neuron_shape[0]*neuron_shape[1]))
+inh_act1 = np.zeros(shape=(imbed_dim, neuron_shape[0]*neuron_shape[1]))
+
+RC = stimulate(stimulus, exc_act1)
+RC = RC.reshape([imbed_dim, neuron_shape[0] * neuron_shape[1]])
 
 def plot_colortable(colors, text_on=True):
     # ref: https://matplotlib.org/stable/gallery/color/named_colors.html#sphx-glr-gallery-color-named-colors-py
@@ -346,6 +352,7 @@ def get_colors(Vt, alpha=0.5):
     return colors
 
 def plot_PCA(Phi, filename=''):
+    Phi = np.asnumpy(Phi)
     U, S, Vt = numpy.linalg.svd(Phi.T, full_matrices=False)   # Phi: 97 * 400
     principal_score = U @ numpy.diag(S)[:, :3]
     principal_scoreT = rescale(principal_score.T, 0.05)
@@ -355,5 +362,7 @@ def plot_PCA(Phi, filename=''):
         fig.savefig(filename, bbox_inches='tight')
     plt.close()
 
-plot_PCA(Phi, "Phi.pdf")
+plot_PCA(RC, "RC.pdf")
+
+
 

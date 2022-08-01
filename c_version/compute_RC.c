@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <math.h>
+#include <string.h>
 #include "matrix_float.c"
 #include "read_csv.c"
 
@@ -381,41 +382,58 @@ float l2_loss(int r, int c, float** w){
     return sqrtloss;
 }
 
-int main(int argc, char **argv) {
+float** update_Phi(float** word_batch, float** exc_act, int bs, int imbed_dim, int neuron_shape, float lr_Phi, float** Phi, float l2_error){
+    float** Phi_T = transpose(imbed_dim, neuron_shape, Phi);
+
+    float** fitted_value = multiply(bs, neuron_shape, imbed_dim, exc_act, Phi_T);
+    free_matrix(neuron_shape, Phi_T);
+
+    float** error = matrix_minus(bs, imbed_dim, word_batch, fitted_value);
+    l2_error = l2_loss(bs, imbed_dim, error);
+    free_matrix(bs, fitted_value);
+
+    float** error_T = transpose(bs, imbed_dim, error);
+    free_matrix(bs, error);
+
+    float** gradient = multiply(imbed_dim, bs, neuron_shape, error_T, exc_act);
+    free_matrix(imbed_dim, error_T);
+
+    normalize(imbed_dim, neuron_shape, gradient);
+
+    scalar_matrix(imbed_dim, neuron_shape, lr_Phi, gradient);
+
+    float** Phi_new = matrix_sum(imbed_dim, neuron_shape, Phi, gradient);
+    free_matrix(imbed_dim, gradient);
+    //free_matrix(imbed_dim, Phi);
+    Phi = Phi_new;
+
+    float* normalize = Phi_normalize(imbed_dim, neuron_shape, Phi);
+
+    for (int j = 0; j < neuron_shape; j++){
+        for (int i = 0; i < imbed_dim; i++){
+            Phi[i][j] = Phi[i][j] / normalize[j];
+        }
+    }
+
+    free(normalize);
+    return Phi;
+}
+
+
+
+int main() {
 
     int ri = 5;
     int re = 3;
     int wi = 5;
     int we = 30;
     int leaky = wi + we;
-    int neuron_shape = 1600;
+    int neuron_shape = 400;
     int sigmaE = 3;
-    int bs = 256;
     int imbed_dim = 97;
     float lr_act = 0.01;
-    float lr_Phi = 0.01;
     float threshold = 0.01;
     float eps = 5e-3;
-    int gradient_step = 10000;
-    float l0_target = 0.1;
-
-    float** mat = read_matrix(55529, imbed_dim, "word_embeddings.csv");
-
-//    printf("Word_batch = ");
-//    print_matrix(bs, imbed_dim, word_batch);
-//    printf("\n");
-
-    //print_matrix(neuron_shape, neuron_shape, laplacian);
-
-    //float** Phi = read_matrix(97, 1600, "code_book.csv");
-    //print_matrix(97, 1600, Phi);
-
-    float** Phi = malloc_matrix(imbed_dim, neuron_shape);
-    for (int i = 0; i < imbed_dim; i++) {
-        for (int j = 0; j < neuron_shape; j++) {
-            Phi[i][j] = 0.3 * rand()/(RAND_MAX+1.0);
-        }
-    }
 
     int num_E_nbs = get_num_nbs(re);
     int num_I_nbs = get_num_nbs(ri);
@@ -426,107 +444,69 @@ int main(int argc, char **argv) {
     float* W_E = compute_W(num_E_nbs, re, we, sigmaE);
     float* W_I = compute_W(num_I_nbs, ri, wi, sigmaE);
 
-    for (int g = 0; g < gradient_step; g++){
+    float** codebook = read_matrix(imbed_dim, neuron_shape, "Phi.csv");
+    //print_matrix(imbed_dim, neuron_shape, codebook);
 
-        float** word_batch = sample_matrix(55529, imbed_dim, bs, mat);
-//        printf("word_batch = ");
-//        print_matrix(bs, imbed_dim, word_batch);
-//        printf("\n");
-
-        float** stimulus = multiply(bs, imbed_dim, neuron_shape, word_batch, Phi);
-
-        float** exc_act = malloc_matrix(bs, neuron_shape);
-        for (int i = 0; i < bs; i++) {
-            for (int j = 0; j < neuron_shape; j++) {
-                exc_act[i][j] = 0;
-            }
+    float** batch = malloc_matrix(imbed_dim, imbed_dim);
+    for (int i = 0; i < imbed_dim; i++){
+        for (int j  = 0; j < imbed_dim; j++){
+            batch[i][i] = 1.0;
         }
-
-        float** inh_act = malloc_matrix(bs, neuron_shape);
-        for (int i = 0; i < bs; i++) {
-            for (int j = 0; j < neuron_shape; j++) {
-                inh_act[i][j] = 0;
-            }
-        }
-
-        float** exc_act_dummy = malloc_matrix(bs, neuron_shape + 1);
-        for (int i = 0; i < bs; i++) {
-            for (int j = 0; j < neuron_shape + 1; j++) {
-                exc_act_dummy[i][j] = 0;
-            }
-        }
-
-        float** inh_act_dummy = malloc_matrix(bs, neuron_shape + 1);
-        for (int i = 0; i < bs; i++) {
-            for (int j = 0; j < neuron_shape + 1; j++) {
-                inh_act_dummy[i][j] = 0;
-            }
-        }
-
-        exc_act = stimulate(neuron_shape, bs, lr_act, threshold, eps, stimulus, exc_act, inh_act, exc_act_dummy, inh_act_dummy,
-                            leaky, num_E_nbs, num_I_nbs, W_E, W_I, N_E, N_I);
-
-        float dthreshold = l0_norm(bs, neuron_shape, exc_act) - l0_target;
-        threshold += 0.01 * dthreshold;
-
-        //////////////////////// update of codebook
-
-        float** Phi_T = transpose(imbed_dim, neuron_shape, Phi);
-
-        float** fitted_value = multiply(bs, neuron_shape, imbed_dim, exc_act, Phi_T);
-        free_matrix(neuron_shape, Phi_T);
-
-        float** error = matrix_minus(bs, imbed_dim, word_batch, fitted_value);
-        float l2_error = l2_loss(bs, imbed_dim, error);
-        free_matrix(bs, fitted_value);
-
-        float** error_T = transpose(bs, imbed_dim, error);
-        free_matrix(bs, error);
-
-        float** gradient = multiply(imbed_dim, bs, neuron_shape, error_T, exc_act);
-        free_matrix(imbed_dim, error_T);
-
-        normalize(imbed_dim, neuron_shape, gradient);
-
-        scalar_matrix(imbed_dim, neuron_shape, lr_Phi, gradient);
-
-        float** Phi_new = matrix_sum(imbed_dim, neuron_shape, Phi, gradient);
-        free_matrix(imbed_dim, gradient);
-        //free_matrix(imbed_dim, Phi);
-        Phi = Phi_new;
-
-        float* normalize = Phi_normalize(imbed_dim, neuron_shape, Phi);
-
-        for (int j = 0; j < neuron_shape; j++){
-            for (int i = 0; i < imbed_dim; i++){
-                Phi[i][j] = Phi[i][j] / normalize[j];
-            }
-        }
-
-        free(normalize);
-
-        ///////////////////////////////// end
-
-        float l0_loss = l0_norm(bs, neuron_shape, exc_act);
-        float l1_loss = l1_norm(bs, neuron_shape, exc_act);
-
-        printf("\n%d. ", g+1);
-        printf("l0_loss = %f ", l0_loss);
-        //printf("l1_loss = %f\n", l1_loss);
-        printf("l2_loss = %f;  ", l2_error);
-        printf("threshold = %f;  \n", threshold);
-
-        //printf("Phi[1][1] = %f\n", Phi[1][1]);
-        //print_matrix(imbed_dim, neuron_shape, Phi);
-
-        free_matrix(bs, exc_act);
-
     }
 
-    //printf("\n");
-    //print_matrix(imbed_dim, neuron_shape, Phi);
+    for (int i = 0; i < imbed_dim; i++){
+        for (int j  = 0; j < imbed_dim; j++){
+            batch[i][j] -= 1.0/imbed_dim;
+        }
+    }
 
-    write_matrix(imbed_dim, neuron_shape, Phi, "Phi.csv");
+    float std_value = std(imbed_dim, batch[1]);
+
+    for (int i = 0; i < imbed_dim; i++){
+        for (int j  = 0; j < imbed_dim; j++){
+            batch[i][j] /= std_value;
+        }
+    }
+
+    float** stimulus1 = multiply(imbed_dim, imbed_dim, neuron_shape, batch, codebook);
+
+//    printf("stimulus1 = ");
+//    print_matrix(imbed_dim, neuron_shape, stimulus1);
+
+    float** exc_act1 = malloc_matrix(imbed_dim, neuron_shape);
+    for (int i = 0; i < imbed_dim; i++) {
+        for (int j = 0; j < neuron_shape; j++) {
+            exc_act1[i][j] = 0;
+        }
+    }
+
+    float** inh_act1 = malloc_matrix(imbed_dim, neuron_shape);
+    for (int i = 0; i < imbed_dim; i++) {
+        for (int j = 0; j < neuron_shape; j++) {
+            inh_act1[i][j] = 0;
+        }
+    }
+
+    float** exc_act_dummy1 = malloc_matrix(imbed_dim, neuron_shape + 1);
+    for (int i = 0; i < imbed_dim; i++) {
+        for (int j = 0; j < neuron_shape + 1; j++) {
+            exc_act_dummy1[i][j] = 0;
+        }
+    }
+
+    float** inh_act_dummy1 = malloc_matrix(imbed_dim, neuron_shape + 1);
+    for (int i = 0; i < imbed_dim; i++) {
+        for (int j = 0; j < neuron_shape + 1; j++) {
+            inh_act_dummy1[i][j] = 0;
+        }
+    }
+
+    printf("\n RC part: threshold = %f; ", threshold);
+    float** RC = stimulate(neuron_shape, imbed_dim, lr_act, threshold, eps, stimulus1, exc_act1,
+                           inh_act1, exc_act_dummy1, inh_act_dummy1,
+                           leaky, num_E_nbs, num_I_nbs, W_E, W_I, N_E, N_I);
+
+    write_matrix(imbed_dim, neuron_shape, RC, "RC.csv");
 
 
     return 0;

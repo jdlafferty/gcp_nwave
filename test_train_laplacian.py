@@ -1,7 +1,8 @@
 import numpy
-import cupy as np
-from cusignal.convolution.convolve import convolve
-#from scipy.signal import convolve
+import numpy as np
+#import cupy as np
+#from cusignal.convolution.convolve import convolve
+from scipy.signal import convolve
 from tqdm import trange
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
@@ -15,13 +16,13 @@ we = 30
 leaky = wi + we
 bs = 256
 imbed_dim = 97
-neuron_shape = (60, 60)
+neuron_shape = (20, 20)
 lr_act = 0.01
 lr_Phi = 0.01
 l0_target = 0.1
 threshold = 0.01
 initial_step = 0
-gradient_steps = 100000
+gradient_steps = 3000
 sigmaE = 3
 max_act_fit = 50
 eps = 5e-3
@@ -31,16 +32,17 @@ num_train_vocabs = word_freq.shape[0]
 print("num_train_vocabs = " + str(num_train_vocabs))
 SUBSAMPLE_SIZE = numpy.asarray(4096)
 
-def load_train_batch():
-    a = []
-    for i in range(55529):
-        a.append(i)
-    a = np.asarray(a)
-    sampled_idx = np.random.choice(a, bs, replace=False)
+# def load_fix_batch(bs):
+#     l = np.arange(bs)
+#     word_batch = word_embeddings[l,:]
+#     return word_batch
+
+def load_train_batch(bs):
+    sampled_idx = np.random.choice(55529, bs, replace=False)
     word_batch = word_embeddings[sampled_idx,:]
     return word_batch
 
-# def sample_word_idx():
+# def sample_word_idx(bs):
 #     subsampled_idx = numpy.random.randint(0, num_train_vocabs, SUBSAMPLE_SIZE)
 #     prob = word_freq[subsampled_idx]
 #     prob = prob / numpy.abs(prob).sum()
@@ -48,8 +50,8 @@ def load_train_batch():
 #     sampled_locs = np.asarray(sampled_locs)
 #     return sampled_locs
 #
-# def load_train_batch():
-#     sampled_idx = sample_word_idx()
+# def load_train_batch(bs):
+#     sampled_idx = sample_word_idx(bs)
 #     word_batch = word_embeddings[sampled_idx, :]
 #     return word_batch
 
@@ -90,38 +92,37 @@ def get_laplacian(n, r1, r2, wi, we, sigmaE = 3):
         for j in range(n):
             # i row, j column
             distsq = find_distsq(i,j)
-            We[i,j] = - np.exp(- distsq/2/sigmaE) * (distsq <= r1sq)
+            We[i,j] = np.exp(- distsq/2/sigmaE) * (distsq <= r1sq)
         We[i] = we * We[i] / sum_exc
     for i in range(n):
         for j in range(n):
             distsq = find_distsq(i,j)
             Wi[i,j] = (distsq <= r2sq)
         Wi[i] = wi * Wi[i] / sum_inh
-    W = We + Wi
-    #cp.fill_diagonal(W, leaky)
-    for i in range(n):
-        W[i][i] += leaky
-    return W
 
-laplacian = get_laplacian(neuron_shape[0]*neuron_shape[1], r1 = re, r2 = ri, wi=wi, we=we)
+    return We, Wi
+
+We, Wi = get_laplacian(neuron_shape[0]*neuron_shape[1], r1 = re, r2 = ri, wi=wi, we=we)
 
 
-def stimulate(stimulus, exc_act):  # stimulus: (256, 20, 20)
+def stimulate(stimulus, exc_act, inh_act):  # stimulus: (256, 20, 20)
 
     for t in range(50):
         exc_act_tm1 = np.copy(exc_act)
 
-        exc_act = exc_act + lr_act * (np.asarray(stimulus) - np.asarray(np.dot(exc_act, laplacian)))
+        # print("exc_act1 = " + str(exc_act))
+        exc_input = np.dot(exc_act, We)
+        inh_input = np.dot(inh_act, Wi)
 
-        # exc_input = convolve(exc_act, exck, mode="same")  # (256, 20, 20)
-        # inh_input = convolve(inh_act, inhk, mode="same")
-        #
-        # exc_act  = exc_act + lr_act * (- leaky * exc_act + stimulus + exc_input - inh_input)
-        # inh_act = inh_act + lr_act * (- leaky * inh_act + exc_input)
+        # print("delta_a = "+str(s))
 
-        # Soft threshold
+        exc_act = exc_act + lr_act * (- leaky * exc_act + stimulus + exc_input - inh_input)
+        inh_act = inh_act + lr_act * (- leaky * inh_act + exc_input)
+
         exc_act = np.maximum(exc_act - threshold, 0) - np.maximum(-exc_act - threshold, 0)
-        #inh_act = np.maximum(inh_act - threshold, 0) - np.maximum(-inh_act - threshold, 0)
+        inh_act = np.maximum(inh_act - threshold, 0) - np.maximum(-inh_act - threshold, 0)
+
+        # print("exc_act = " + str(exc_act))
 
         da = exc_act - exc_act_tm1
         relative_error = np.sqrt(np.square(da).sum()) / (eps + np.sqrt(np.square(exc_act_tm1).sum()))
@@ -137,6 +138,10 @@ def stimulate(stimulus, exc_act):  # stimulus: (256, 20, 20)
 
 Phi = 0.3 * np.random.rand(imbed_dim, neuron_shape[0]*neuron_shape[1])
 
+# for i in range(imbed_dim):
+#     for j in range(neuron_shape[0] * neuron_shape[1]):
+#         Phi[i][j] = 0.1
+
 word_embeddings = numpy.load('../data/googleNgram/embed100.npy')
 word_embeddings = numpy.delete(word_embeddings, [55, 58, 84], axis=1)
 word_embeddings = np.asarray(word_embeddings)
@@ -147,16 +152,20 @@ l0_loss = []
 tbar = trange(initial_step, initial_step + gradient_steps, desc='Training', leave=True, miniters=100)
 
 for i in tbar:
-    word_batch = load_train_batch()  #this_X : 256 * 97
+    word_batch = load_train_batch(bs)  #this_X : 256 * 97
 
+    # print("Phi = " +str(Phi))
+    # print("word_batch = " +str(word_batch))
     stimulus = np.dot(word_batch, Phi)  # stimulus: (256, 20， 20)
     # Get neuron activity
+    #print("stimulus = " +str(stimulus))
 
     exc_act = np.zeros(shape=(bs, neuron_shape[0]*neuron_shape[1]))
     inh_act = np.zeros(shape=(bs, neuron_shape[0]*neuron_shape[1]))
 
-    activation = stimulate(stimulus, exc_act)
-    #activation = activation.reshape(bs, neuron_shape[0] * neuron_shape[1])
+    activation = stimulate(stimulus, exc_act, inh_act)
+
+    #print("activation = " + str(activation))
 
     # Neuron model evolve and reset
     dthreshold = np.mean((np.abs(activation) > 1e-4)) - l0_target
@@ -187,15 +196,25 @@ for i in tbar:
 
     if i % 100 == 0:
         #print(str(i) + ". Phi = " + str(Phi))
-        tbar.set_description("loss=%.3f sparsity=%2.2f%% lmda=%.3f" % \
+        tbar.set_description("loss=%.3f sparsity=%2.2f%% threshold=%.3f" % \
                                      (l2l, 100 * l0l, threshold))
         tbar.refresh()
 
-np.save("codebook_laplacian.npy", Phi)
+#print("Phi = " +str(Phi))
 
-################
-#plot phi
-################
+batch = np.eye(imbed_dim)
+batch = batch - numpy.mean(batch, axis=1)
+batch = batch / numpy.std(batch, axis=1)
+
+stimulus = np.dot(batch, Phi)
+#print("batch = " +str(batch))
+#print("stimulus = " +str(stimulus))
+
+exc_act1 = np.zeros(shape=(imbed_dim, neuron_shape[0]*neuron_shape[1]))
+inh_act1 = np.zeros(shape=(imbed_dim, neuron_shape[0]*neuron_shape[1]))
+
+RC = stimulate(stimulus, exc_act1, inh_act1)
+#print("RC = " +str(RC))
 
 def plot_colortable(colors, text_on=True):
     # ref: https://matplotlib.org/stable/gallery/color/named_colors.html#sphx-glr-gallery-color-named-colors-py
@@ -247,6 +266,7 @@ def get_colors(Vt, alpha=0.5):
     return colors
 
 def plot_PCA(Phi, filename=''):
+    #Phi = np.asnumpy(Phi)
     U, S, Vt = numpy.linalg.svd(Phi.T, full_matrices=False)   # Phi: 97 * 400
     principal_score = U @ numpy.diag(S)[:, :3]
     principal_scoreT = rescale(principal_score.T, 0.05)
@@ -256,5 +276,7 @@ def plot_PCA(Phi, filename=''):
         fig.savefig(filename, bbox_inches='tight')
     plt.close()
 
-plot_PCA(Phi, "Phi.pdf")
+plot_PCA(RC, "RC.pdf")
+
+
 
