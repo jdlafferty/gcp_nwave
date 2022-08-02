@@ -13,6 +13,7 @@ A cupy implementation of the nwave experiments.
     - matrix.c: implement vector multiplication and matrix multiplication in pure c
 
 - FPGA_version/ : convert the program to FPGA
+    For ACT language, refer to https://avlsi.csl.yale.edu/act/doku.php?id=language:start.
     - example.act: sample code from Prof.Rajit
 
 - variables_record/ : record and analyze all the values during the computation
