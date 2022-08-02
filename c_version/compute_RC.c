@@ -420,7 +420,6 @@ float** update_Phi(float** word_batch, float** exc_act, int bs, int imbed_dim, i
 }
 
 
-
 int main() {
 
     int ri = 5;
@@ -428,7 +427,7 @@ int main() {
     int wi = 5;
     int we = 30;
     int leaky = wi + we;
-    int neuron_shape = 400;
+    int neuron_shape = 1600;
     int sigmaE = 3;
     int imbed_dim = 97;
     float lr_act = 0.01;
@@ -445,7 +444,6 @@ int main() {
     float* W_I = compute_W(num_I_nbs, ri, wi, sigmaE);
 
     float** codebook = read_matrix(imbed_dim, neuron_shape, "Phi.csv");
-    //print_matrix(imbed_dim, neuron_shape, codebook);
 
     float** batch = malloc_matrix(imbed_dim, imbed_dim);
     for (int i = 0; i < imbed_dim; i++){
@@ -507,7 +505,6 @@ int main() {
                            leaky, num_E_nbs, num_I_nbs, W_E, W_I, N_E, N_I);
 
     write_matrix(imbed_dim, neuron_shape, RC, "RC.csv");
-
 
     return 0;
 }
