@@ -356,14 +356,9 @@ def stimulate(stimulus):  # stimulus: (256, 20, 20)
     global inh_act_dummy
     for t in range(int(max_act_fit)):
         exc_act_tm1 = cp.copy(exc_act)
-        #print("#######################################\n")
-        #print("activation_dummy0 = " +str(activation_dummy))
-        #print("exc_act0 = " +str(exc_act))
 
         delta_a_exc = exc_act_update(exc_act_dummy, inh_act_dummy)
         delta_a_inh = inh_act_update(exc_act_dummy, inh_act_dummy)
-        #print("activation_dummy1 = " + str(activation_dummy))
-        #print("delta_a = " +str(delta_a))
 
         exc_act = exc_act + lr_act * (cp.asarray(stimulus) + cp.asarray(delta_a_exc))  # dimension problem
         inh_act = inh_act + lr_act * (cp.asarray(delta_a_inh))
@@ -371,8 +366,6 @@ def stimulate(stimulus):  # stimulus: (256, 20, 20)
         exc_act = cp.maximum(exc_act - threshold, 0) - cp.maximum(-exc_act - threshold, 0)
         inh_act = cp.maximum(inh_act - threshold, 0) - cp.maximum(-inh_act - threshold, 0)
 
-        #print("exc_act1 = " + str(exc_act))
-        #print("#######################################\n")
         for i in range(bs):
             for j in range(neuron_shape[0]*neuron_shape[1]):
                 exc_act_dummy[i][j] = exc_act[i][j]

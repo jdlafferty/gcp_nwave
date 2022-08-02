@@ -207,15 +207,11 @@ def stimulate(stimulus, exc_act):  # stimulus: (256, 20, 20)
         exc_act_tm1 = np.copy(exc_act)
 
         delta_a = activation_update(activation_dummy)
-        # print("activation_dummy1 = " + str(activation_dummy))
-        # print("delta_a = " +str(delta_a))
 
         exc_act = exc_act + lr_act * (np.asarray(stimulus) + np.asarray(delta_a))  # dimension problem
 
         exc_act = np.maximum(exc_act - threshold, 0) - np.maximum(-exc_act - threshold, 0)
 
-        # print("exc_act1 = " + str(exc_act))
-        # print("#######################################\n")
         for i in range(bs):
             for j in range(neuron_shape[0] * neuron_shape[1]):
                 activation_dummy[i][j] = exc_act[i][j]
@@ -352,7 +348,7 @@ def get_colors(Vt, alpha=0.5):
     return colors
 
 def plot_PCA(Phi, filename=''):
-    Phi = np.asnumpy(Phi)
+    #Phi = np.asnumpy(Phi)
     U, S, Vt = numpy.linalg.svd(Phi.T, full_matrices=False)   # Phi: 97 * 400
     principal_score = U @ numpy.diag(S)[:, :3]
     principal_scoreT = rescale(principal_score.T, 0.05)

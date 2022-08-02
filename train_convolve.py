@@ -37,19 +37,6 @@ def load_train_batch():
     word_batch = word_embeddings[sampled_idx,:]
     return word_batch
 
-# def sample_word_idx():
-#     subsampled_idx = numpy.random.randint(0, num_train_vocabs, SUBSAMPLE_SIZE)
-#     prob = word_freq[subsampled_idx]
-#     prob = prob / numpy.abs(prob).sum()
-#     sampled_locs = numpy.random.choice(a=subsampled_idx, size=bs, replace=False, p=prob)
-#     sampled_locs = np.asarray(sampled_locs)
-#     return sampled_locs
-#
-# def load_train_batch():
-#     sampled_idx = sample_word_idx()
-#     word_batch = word_embeddings[sampled_idx, :]
-#     return word_batch
-
 def get_kernels(re, ri, wi=5, we=30, sigmaE = 3):
     k_exc = np.zeros([2*re+1, 2*re+1])
     k_inh = np.zeros([2*ri+1, 2*ri+1])
