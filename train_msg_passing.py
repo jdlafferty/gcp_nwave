@@ -41,21 +41,6 @@ def load_train_batch():
     word_batch = word_embeddings[sampled_idx,:]
     return word_batch
 
-# def sample_word_idx():
-#     subsampled_idx = numpy.random.randint(0, num_train_vocabs, SUBSAMPLE_SIZE)
-#     prob = word_freq[subsampled_idx]
-#     prob = prob / numpy.abs(prob).sum()
-#     sampled_locs = numpy.random.choice(a=subsampled_idx, size=bs, replace=False, p=prob)
-#     sampled_locs = np.asarray(sampled_locs)
-#     return sampled_locs
-#
-# def load_train_batch():
-#     sampled_idx = sample_word_idx()
-#     word_batch = word_embeddings[sampled_idx, :]
-#     return word_batch
-
-########################################
-
 def get_num_nbs(r):
     count = 0
     for i in range((r+1)**2):
@@ -68,13 +53,9 @@ def get_num_nbs(r):
     num_nbs = (count-(r+1))*4 +1
     return num_nbs
 
-num_E_nbs = get_num_nbs(re)  # 29
+num_E_nbs = get_num_nbs(re)
 
-num_I_nbs = get_num_nbs(ri)  # 81
-
-
-#print("num_E_nbs = " + str(num_E_nbs))
-#print("num_I_nbs = " +str(num_I_nbs))
+num_I_nbs = get_num_nbs(ri)
 
 #####################################
 # compute index set of each neurons
@@ -141,9 +122,6 @@ def compute_indexset(r, num_nbs):
 N_E = compute_indexset(re, num_E_nbs)
 N_I = compute_indexset(ri, num_I_nbs)
 
-#print("N_E = " +str(N_E))
-# print("N_I = " +str(N_I))
-
 #####################################
 # compute weight kernels W_E and W_I
 #####################################
@@ -159,9 +137,7 @@ for i in range((2*re+1)**2):
         W_E[count_E] = np.exp(- distsq/2/sigmaE)
         count_E += 1
 
-#print("count_E = " + str(count_E))
 W_E = we * W_E / np.sum(W_E)
-#print("W_E = " +str(W_E))
 
 count_I = 0
 for i in range((2*ri+1)**2):
@@ -172,9 +148,7 @@ for i in range((2*ri+1)**2):
         W_I[count_I] = 1
         count_I += 1
 
-#print("count_I = " + str(count_I))
 W_I = wi * W_I / np.sum(W_I)
-#print("W_I = " +str(W_I))
 
 ###########################
 # Update algorithms
@@ -270,9 +244,6 @@ for i in tbar:
     l0l = np.mean(np.abs(activation) > 1e-4)
     l1l = np.abs(activation).mean()
     l2l = np.sqrt(np.square(error).sum())
-
-    # exc_act.fill(0)
-    # inh_act.fill(0)
 
     ########### end
 
