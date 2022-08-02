@@ -6,16 +6,28 @@ A cupy implementation of the nwave experiments.
     - neurodynamics.py : update rule of activations
     - wave.py : combine dictlearner and neurodynamics
     - utils.py : store many functions that will be used in other files
+
+- c_version/ : convert the program to c
+    TODO
+    - makefile: to compile the c code
+    - matrix.c: implement vector multiplication and matrix multiplication in pure c
+
+- FPGA_version/ : convert the program to FPGA
+    - example.act: sample code from Prof.Rajit
+
+- variables_record/ : record and analyze all the values during the computation
+    - record_variable_values.py: record all the values. Index are from random sampling the batch; value are from the computations
+    - analyze_variable_values.py: analyze and make histogram plots
+
 - experiment.py : interface to experiment, including training, plotting receptive fields and plotting activations
 - dataloader.py : load data 
 - configs.py : read all the hyperparameters
+
+TODO
 - compute_whole_activ.py: compute whole "activity.npy", which contains the activations of over 50,000 words
 - compute_act_convolve.py: Don't compute whole activity file. Given some words, plot corresponding activations using spicy.convolve
 - compute_act_laplacian.py: Don't compute whole activity file. Given some words, plot corresponding activations using multiplication of laplacian matrix and activations
 - matrix.py: implement vector multiplication and matrix multiplication in pure python
-- c_matrix/ : convert the program to c
-    - makefile: to compile the c code
-    - matrix.c: implement vector multiplication and matrix multiplication in pure c
 
 
 # start 
