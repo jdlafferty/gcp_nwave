@@ -230,6 +230,23 @@ for i in tbar:
                                      (l2l, 100 * l0l, threshold))
         tbar.refresh()
 
+batch = np.eye(imbed_dim)
+batch = batch - numpy.mean(batch, axis=1)
+batch = batch / numpy.std(batch, axis=1)
+
+m.append(np.copy(batch))
+
+stimulus = np.dot(batch, Phi)
+
+m.append(np.copy(stimulus))
+
+exc_act1 = np.zeros(shape=(imbed_dim, neuron_shape[0]*neuron_shape[1]))
+inh_act1 = np.zeros(shape=(imbed_dim, neuron_shape[0]*neuron_shape[1]))
+
+RC = stimulate(stimulus, exc_act1, inh_act1)
+
+m.append(np.copy(RC))
+
 
 print("finish training")
 
