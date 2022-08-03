@@ -1,8 +1,8 @@
 import numpy
-#import numpy as np
-import cupy as np
-from cusignal.convolution.convolve import convolve
-#from scipy.signal import convolve
+import numpy as np
+#import cupy as np
+#from cusignal.convolution.convolve import convolve
+from scipy.signal import convolve
 from tqdm import trange
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
@@ -16,7 +16,7 @@ we = 30
 leaky = wi + we
 bs = 256
 imbed_dim = 97
-neuron_shape = (20, 20)
+neuron_shape = (40, 40)
 lr_act = 0.01
 lr_Phi = 0.01
 l0_target = 0.1

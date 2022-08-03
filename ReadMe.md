@@ -8,10 +8,20 @@ A cupy implementation of the nwave experiments.
     - utils.py : store many functions that will be used in other files
 
 - c_version/ : convert the program to c
-    TODO
+    
     - makefile: to compile the c code
-    - matrix.c: implement vector multiplication and matrix multiplication in pure c
-
+    - compute_act_laplacian.c: compute activations using laplacian matrix
+    - compute_act_msg_passing: compute activations using  message passing algorithm
+    - compute_RC.c: compute receptive field using trained codebook
+    - matrix_float.c: implement vector multiplication and matrix multiplication in pure c
+    - msg_passing_algorithm.c: implement message passing algorithm in C
+    - plot_RC.ipynb: plot receptive field given data from compute_RC.c 
+    - read_csv.c: read data from csv files
+    - read_parameter.c: read hyperparameters in csv files
+    - test_between_C_and_python.ipynb: compare the results between C version and python version
+    - train_laplacian.c: implement training steps using laplacian matrix in C
+    - train_msg_passing.c: implement training steps using message passing algorithm in C
+    
 - FPGA_version/ : convert the program to FPGA
 
     For ACT language, refer to https://avlsi.csl.yale.edu/act/doku.php?id=language:start.
@@ -22,14 +32,19 @@ A cupy implementation of the nwave experiments.
     - analyze_variable_values.py: analyze and make histogram plots
 
 - experiment.py : interface to experiment, including training, plotting receptive fields and plotting activations
+
 - dataloader.py : load data 
+
 - configs.py : read all the hyperparameters
 
-TODO
 - compute_whole_activ.py: compute whole "activity.npy", which contains the activations of over 50,000 words
 - compute_act_convolve.py: Don't compute whole activity file. Given some words, plot corresponding activations using spicy.convolve
 - compute_act_laplacian.py: Don't compute whole activity file. Given some words, plot corresponding activations using multiplication of laplacian matrix and activations
+- compute_act_msg_passing.py: Don't compute whole activity file. Given some words, compute and plot activations using message passing algorithm
 - matrix.py: implement vector multiplication and matrix multiplication in pure python
+- train_convolve.py: standalone python file of training process, and using convolution
+- train_laplacian.py: standalone python file of training process, and using laplacian matrix
+- train_msg_passing.py: standalone python file of training process, and using message passing algorithm
 
 
 # start 
