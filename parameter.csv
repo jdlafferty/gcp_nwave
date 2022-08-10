@@ -5,3 +5,8 @@ ri,re,wi,we,neuron_shape,gradient_steps,batch_size,lr_act,lr_codebook,l0_target,
 5,3,5,30,1600,25000,256,0.01,0.01,0.1,0.01,15h 52m 34s,0h 45m 42s,58.32,58.43
 5,3,5,30,6400,600000,256,0.01,0.01,0.1,0.007,0,26h 9m 56s,0,33.78
 5,3,5,30,400,10000,256,0.01,0.01,0.1,0.01,0,0,0,0
+
+
+
+bigger re and ri, sigmaE
+
