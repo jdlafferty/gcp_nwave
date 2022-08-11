@@ -127,7 +127,7 @@ float max(float a, float b){
     }
 }
 
-float** stimulate(int neuron_shape, int bs, float lr_act, float threshold, float eps, float** stimulus,
+void stimulate(int neuron_shape, int bs, float lr_act, float threshold, float eps, float** stimulus,
                   float** exc_act_dummy, float** inh_act_dummy, int leaky,
                   int num_E_nbs, int num_I_nbs, float* W_E, float* W_I, int** N_E, int** N_I){
 
@@ -191,7 +191,6 @@ float** stimulate(int neuron_shape, int bs, float lr_act, float threshold, float
 //
 //            free_matrix(bs, exc_tm1);
     }
-    return exc_act_dummy;
 
 //        if (relative_error < eps) {
 //            printf("relative_error = %f\n", relative_error);
@@ -310,10 +309,11 @@ int main(int argc, char **argv) {
 
     float** gradient = malloc_matrix(imbed_dim, neuron_shape);
 
+    float** word_batch = malloc_matrix(bs, imbed_dim);
+
     for (int g = 0; g < gradient_step; g++){
 
-        float** word_batch = sample_matrix(55529, imbed_dim, bs, mat);
-
+        sample_matrix(55529, imbed_dim, bs, mat, word_batch);
 
         for (int i = 0; i < bs; i++) {
             for (int j = 0; j < neuron_shape + 1; j++) {
@@ -342,7 +342,7 @@ int main(int argc, char **argv) {
             }
         }
 
-        exc_act_dummy = stimulate(neuron_shape, bs, lr_act, threshold, eps, stimulus,
+        stimulate(neuron_shape, bs, lr_act, threshold, eps, stimulus,
                                   exc_act_dummy, inh_act_dummy, leaky, num_E_nbs, num_I_nbs, W_E, W_I, N_E, N_I);
 
         float dthreshold = l0_norm(bs, neuron_shape, exc_act_dummy) - l0_target;
@@ -371,16 +371,16 @@ int main(int argc, char **argv) {
             }
         }
 
-        // float** error = matrix_minus(bs, imbed_dim, word_batch, fitted_value);
+        // error = word_batch - fitted_value
         for (int i = 0; i < bs; i++) {
             for (int j = 0; j < imbed_dim; j++) {
-                fitted_value[i][j] = word_batch[i][j] - fitted_value[i][j];;
+                fitted_value[i][j] = word_batch[i][j] - fitted_value[i][j];
             }
         }
 
         float l2_error = l2_loss(bs, imbed_dim, fitted_value);
 
-        // gradient = fitted_value.t @ exc_act
+        // gradient = fitted_value.T @ exc_act
         for (int i = 0; i < imbed_dim; i++) {
             for (int j = 0; j < neuron_shape; j++) {
                 gradient[i][j] = 0;

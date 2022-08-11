@@ -131,7 +131,7 @@ float max(float a, float b){
     }
 }
 
-float** stimulate(int neuron_shape, int bs, float lr_act, float threshold, float eps, float** stimulus,
+void stimulate(int neuron_shape, int bs, float lr_act, float threshold, float eps, float** stimulus,
                   float** exc_act_dummy, float** inh_act_dummy, int leaky,
                   int num_E_nbs, int num_I_nbs, float* W_E, float* W_I, int** N_E, int** N_I){
 
@@ -195,7 +195,6 @@ float** stimulate(int neuron_shape, int bs, float lr_act, float threshold, float
 //
 //            free_matrix(bs, exc_tm1);
         }
-    return exc_act_dummy;
 
 //        if (relative_error < eps) {
 //            printf("relative_error = %f\n", relative_error);
@@ -259,7 +258,7 @@ int main() {
     }
 
     // Update of activations
-    exc_act_dummy = stimulate(neuron_shape, bs, lr_act, threshold, eps, stimulus,
+    stimulate(neuron_shape, bs, lr_act, threshold, eps, stimulus,
                               exc_act_dummy, inh_act_dummy, leaky, num_E_nbs, num_I_nbs, W_E, W_I, N_E, N_I);
 
     //print_matrix(bs, neuron_shape, exc_act_dummy);

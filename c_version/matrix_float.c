@@ -26,20 +26,13 @@ float** copy_matrix(int row, int col, float** m) {
     return copy;
 }
 
-float** sample_matrix(int row, int col, int sample_size, float** m) {
-    float** sample = malloc(sizeof(float*) * sample_size);
-    for (int i = 0; i < sample_size; i++) {
-        sample[i] = malloc(sizeof(float) * col);
-    }
-
+void sample_matrix(int row, int col, int sample_size, float** m, float** sample) {
     for (int i = 0; i < sample_size; i++) {
         int m_row = rand() % row;
         for (int j = 0; j < col; j++) {
             sample[i][j] = m[m_row][j];
         }
     }
-
-    return sample;
 }
 
  float** sample_matrix1(int row, int col, int sample_size, float** m) {
