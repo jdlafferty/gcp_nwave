@@ -61,7 +61,7 @@ int get_index_from_position(int xi, int yi, int xj, int yj, int r){
             free(l);
             return index;
         }
-        else if (yi < yj){
+        else {
             int index = core_index + (l[r]-1)/2 + diff + (l[r-(yi - yj)]+1)/2 + (xj - xi);
             free(l);
             return index;
@@ -69,7 +69,7 @@ int get_index_from_position(int xi, int yi, int xj, int yj, int r){
     }
 }
 
-int ** compute_indexset(r, num_nbs, neuron_shape){
+int ** compute_indexset(int r, int num_nbs, int neuron_shape){
     int side_length = sqrt(neuron_shape);
     int** set = malloc(sizeof(int*) * neuron_shape);
     for (int i = 0; i < neuron_shape; i++) {
@@ -97,7 +97,7 @@ int ** compute_indexset(r, num_nbs, neuron_shape){
     return set;
 }
 
-float* compute_W(num_nbs, r, w, sigmaE){
+float* compute_W(int num_nbs, int r, int w, int sigmaE){
     float* W = malloc(sizeof(float) * num_nbs);
     int count = 0;
     for (int i = 0; i < (2*r+1)*(2*r+1); i++){
@@ -225,23 +225,6 @@ float absolute(float a){
     }
 }
 
-float* Phi_normalize(int row, int col, float** w){
-    float* result = malloc(sizeof(float) * col);
-    for (int i = 0; i < col; i++){
-        float sum = 0;
-        for (int j = 0; j < row; j++){
-            sum += w[j][i] * w[j][i];
-        }
-        if (sqrt(sum) > 1e-8){
-            result[i] = sqrt(sum);
-        }
-        else{
-            result[i] = 1e-8;
-        }
-    }
-    return result;
-}
-
 float l0_norm(int r, int c, float** w){
     float count = 0;
     int size = r * c;
@@ -316,28 +299,21 @@ int main(int argc, char **argv) {
     float* W_I = compute_W(num_I_nbs, ri, wi, sigmaE);
 
     float** exc_act = malloc_matrix(bs, neuron_shape);
-    for (int i = 0; i < bs; i++) {
-        for (int j = 0; j < neuron_shape; j++) {
-            exc_act[i][j] = 0;
-        }
-    }
-
-    float** inh_act = malloc_matrix(bs, neuron_shape);
-    for (int i = 0; i < bs; i++) {
-        for (int j = 0; j < neuron_shape; j++) {
-            inh_act[i][j] = 0;
-        }
-    }
 
     float** exc_act_dummy = malloc_matrix(bs, neuron_shape + 1);
 
     float** inh_act_dummy = malloc_matrix(bs, neuron_shape + 1);
 
+    float** stimulus = malloc_matrix(bs, neuron_shape);
+
+    float** fitted_value = malloc_matrix(bs, imbed_dim);
+
+    float** gradient = malloc_matrix(imbed_dim, neuron_shape);
+
     for (int g = 0; g < gradient_step; g++){
 
         float** word_batch = sample_matrix(55529, imbed_dim, bs, mat);
 
-        float** stimulus = multiply(bs, imbed_dim, neuron_shape, word_batch, Phi);
 
         for (int i = 0; i < bs; i++) {
             for (int j = 0; j < neuron_shape + 1; j++) {
@@ -351,6 +327,21 @@ int main(int argc, char **argv) {
             }
         }
 
+        // stimulus = word_batch @ Phi
+        for (int i = 0; i < bs; i++) {
+            for (int j = 0; j < neuron_shape; j++) {
+                stimulus[i][j] = 0;
+            }
+        }
+
+        for (int i = 0; i < bs; i++) {
+            for (int j = 0; j < neuron_shape; j++) {
+                for (int k = 0; k < imbed_dim; k++) {
+                    stimulus[i][j] += word_batch[i][k] * Phi[k][j];
+                }
+            }
+        }
+
         exc_act_dummy = stimulate(neuron_shape, bs, lr_act, threshold, eps, stimulus,
                                   exc_act_dummy, inh_act_dummy, leaky, num_E_nbs, num_I_nbs, W_E, W_I, N_E, N_I);
 
@@ -360,45 +351,80 @@ int main(int argc, char **argv) {
         for (int i = 0; i < bs; i++){
             for (int j = 0; j < neuron_shape; j++){
                 exc_act[i][j] = exc_act_dummy[i][j];
-                inh_act[i][j] = inh_act_dummy[i][j];
             }
         }
 
         //////////////////////// update of codebook
 
-        float** Phi_T = transpose(imbed_dim, neuron_shape, Phi);
+        // fitted_value = exc_act @ Phi.T
+        for (int i = 0; i < bs; i++) {
+            for (int j = 0; j < imbed_dim; j++) {
+                fitted_value[i][j] = 0;
+            }
+        }
 
-        float** fitted_value = multiply(bs, neuron_shape, imbed_dim, exc_act, Phi_T);
-        free_matrix(neuron_shape, Phi_T);
+        for (int i = 0; i < bs; i++) {
+            for (int j = 0; j < imbed_dim; j++) {
+                for (int k = 0; k < neuron_shape; k++) {
+                    fitted_value[i][j] += exc_act[i][k] * Phi[j][k];
+                }
+            }
+        }
 
-        float** error = matrix_minus(bs, imbed_dim, word_batch, fitted_value);
-        float l2_error = l2_loss(bs, imbed_dim, error);
-        free_matrix(bs, fitted_value);
+        // float** error = matrix_minus(bs, imbed_dim, word_batch, fitted_value);
+        for (int i = 0; i < bs; i++) {
+            for (int j = 0; j < imbed_dim; j++) {
+                fitted_value[i][j] = word_batch[i][j] - fitted_value[i][j];;
+            }
+        }
 
-        float** error_T = transpose(bs, imbed_dim, error);
-        free_matrix(bs, error);
+        float l2_error = l2_loss(bs, imbed_dim, fitted_value);
 
-        float** gradient = multiply(imbed_dim, bs, neuron_shape, error_T, exc_act);
-        free_matrix(imbed_dim, error_T);
+        // gradient = fitted_value.t @ exc_act
+        for (int i = 0; i < imbed_dim; i++) {
+            for (int j = 0; j < neuron_shape; j++) {
+                gradient[i][j] = 0;
+            }
+        }
+
+        for (int i = 0; i < imbed_dim; i++) {
+            for (int j = 0; j < neuron_shape; j++) {
+                for (int k = 0; k < bs; k++) {
+                    gradient[i][j] += fitted_value[k][i] * exc_act[k][j];
+                }
+            }
+        }
 
         normalize(imbed_dim, neuron_shape, gradient);
 
         scalar_matrix(imbed_dim, neuron_shape, lr_Phi, gradient);
 
-        float** Phi_new = matrix_sum(imbed_dim, neuron_shape, Phi, gradient);
-        free_matrix(imbed_dim, gradient);
-        //free_matrix(imbed_dim, Phi);
-        Phi = Phi_new;
-
-        float* normalize = Phi_normalize(imbed_dim, neuron_shape, Phi);
-
-        for (int j = 0; j < neuron_shape; j++){
-            for (int i = 0; i < imbed_dim; i++){
-                Phi[i][j] = Phi[i][j] / normalize[j];
+        // Phi += gradient
+        for (int i = 0; i < imbed_dim; i++) {
+            for (int j = 0; j < neuron_shape; j++) {
+                Phi[i][j] += gradient[i][j];
             }
         }
 
-        free(normalize);
+        // normalize Phi
+        float result, sum;
+        for (int j = 0; j < neuron_shape; j++){
+            sum = 0;
+            for (int i = 0; i < imbed_dim; i++){
+                sum += Phi[i][j] * Phi[i][j];
+            }
+            if (sqrt(sum) > 1e-8){
+                result = sqrt(sum);
+            }
+            else{
+                result = 1e-8;
+            }
+
+            for (int i = 0; i < imbed_dim; i++){
+                Phi[i][j] = Phi[i][j] / result;
+            }
+            
+        }
 
         ///////////////////////////////// end
 
@@ -407,6 +433,7 @@ int main(int argc, char **argv) {
 
         printf("\n%d. ", g+1);
         printf("l0_loss = %f ", l0_loss);
+        printf("l1_loss = %f ", l1_loss);
         printf("l2_loss = %f;  ", l2_error);
         printf("threshold = %f;  \n", threshold);
 
