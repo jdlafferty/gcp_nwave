@@ -64,7 +64,7 @@ int get_index_from_position(int xi, int yi, int xj, int yj, int r){
             free(l);
             return index;
         }
-        else if (yi < yj){
+        else {
             int index = core_index + (l[r]-1)/2 + diff + (l[r-(yi - yj)]+1)/2 + (xj - xi);
             free(l);
             return index;
@@ -72,7 +72,7 @@ int get_index_from_position(int xi, int yi, int xj, int yj, int r){
     }
 }
 
-int ** compute_indexset(r, num_nbs, neuron_shape){
+int ** compute_indexset(int r, int num_nbs, int neuron_shape){
     int side_length = sqrt(neuron_shape);
     int** set = malloc(sizeof(int*) * neuron_shape);
     for (int i = 0; i < neuron_shape; i++) {
@@ -100,7 +100,7 @@ int ** compute_indexset(r, num_nbs, neuron_shape){
     return set;
 }
 
-float* compute_W(num_nbs, r, w, sigmaE){
+float* compute_W(int num_nbs, int r, int w, int sigmaE){
     float* W = malloc(sizeof(float) * num_nbs);
     int count = 0;
     for (int i = 0; i < (2*r+1)*(2*r+1); i++){
@@ -131,8 +131,8 @@ float max(float a, float b){
     }
 }
 
-float** stimulate(int neuron_shape, int bs, float lr_act, float threshold, float eps, float** stimulus, float** delta_a_exc,
-                  float** delta_a_inh, float** exc_act_dummy, float** inh_act_dummy, int leaky,
+float** stimulate(int neuron_shape, int bs, float lr_act, float threshold, float eps, float** stimulus,
+                  float** exc_act_dummy, float** inh_act_dummy, int leaky,
                   int num_E_nbs, int num_I_nbs, float* W_E, float* W_I, int** N_E, int** N_I){
 
     //float relative_error;
@@ -141,29 +141,31 @@ float** stimulate(int neuron_shape, int bs, float lr_act, float threshold, float
 
         //float **exc_tm1 = copy_matrix(bs, neuron_shape+1, exc_act_dummy);
 
+        float delta_a_exc, delta_a_inh;
+
         // Update of activations
         for (int k = 0; k < bs; k++) {
             for (int i = 0; i < neuron_shape; i++) {
 
                 //Update of exhibitory neurons;
-                delta_a_exc[k][i] = - leaky * exc_act_dummy[k][i];
+                delta_a_exc = - leaky * exc_act_dummy[k][i];
                 for (int j = 0; j < num_E_nbs; j++) {
-                    delta_a_exc[k][i] += W_E[j] * exc_act_dummy[k][N_E[i][j]];
+                    delta_a_exc += W_E[j] * exc_act_dummy[k][N_E[i][j]];
                 }
                 for (int j = 0; j < num_I_nbs; j++) {
-                    delta_a_exc[k][i] -= W_I[j] * inh_act_dummy[k][N_I[i][j]];
+                    delta_a_exc -= W_I[j] * inh_act_dummy[k][N_I[i][j]];
                 }
-                delta_a_exc[k][i] += stimulus[k][i];
-                delta_a_exc[k][i] = lr_act * delta_a_exc[k][i];
-                exc_act_dummy[k][i] = exc_act_dummy[k][i] + delta_a_exc[k][i];
+                delta_a_exc += stimulus[k][i];
+                delta_a_exc = lr_act * delta_a_exc;
+                exc_act_dummy[k][i] = exc_act_dummy[k][i] + delta_a_exc;
                 exc_act_dummy[k][i] = max(exc_act_dummy[k][i] - threshold, 0.0) - max(-exc_act_dummy[k][i] - threshold, 0.0);
 
                 //Update of inhibitory neurons;
-                delta_a_inh[k][i] = - leaky * inh_act_dummy[k][i];
+                delta_a_inh = - leaky * inh_act_dummy[k][i];
                 for (int j = 0; j < num_E_nbs; j++){
-                    delta_a_inh[k][i] += W_E[j] * exc_act_dummy[k][N_E[i][j]];}
-                delta_a_inh[k][i] = lr_act * delta_a_inh[k][i];
-                inh_act_dummy[k][i] = inh_act_dummy[k][i] + delta_a_inh[k][i];
+                    delta_a_inh += W_E[j] * exc_act_dummy[k][N_E[i][j]];}
+                delta_a_inh = lr_act * delta_a_inh;
+                inh_act_dummy[k][i] = inh_act_dummy[k][i] + delta_a_inh;
                 inh_act_dummy[k][i] = max(inh_act_dummy[k][i] - threshold, 0.0) - max(-inh_act_dummy[k][i] - threshold, 0.0);
 
             }
@@ -256,22 +258,8 @@ int main() {
         }
     }
 
-    float** delta_a_exc = malloc_matrix(bs, neuron_shape); //These are medium variables in the update formula
-    for (int i = 0; i < bs; i++) {
-        for (int j = 0; j < neuron_shape; j++) {
-            delta_a_exc[i][j] = 0;
-        }
-    }
-
-    float** delta_a_inh = malloc_matrix(bs, neuron_shape); //These are medium variables in the update formula
-    for (int i = 0; i < bs; i++) {
-        for (int j = 0; j < neuron_shape; j++) {
-            delta_a_inh[i][j] = 0;
-        }
-    }
-
     // Update of activations
-    exc_act_dummy = stimulate(neuron_shape, bs, lr_act, threshold, eps, stimulus, delta_a_exc, delta_a_inh,
+    exc_act_dummy = stimulate(neuron_shape, bs, lr_act, threshold, eps, stimulus,
                               exc_act_dummy, inh_act_dummy, leaky, num_E_nbs, num_I_nbs, W_E, W_I, N_E, N_I);
 
     //print_matrix(bs, neuron_shape, exc_act_dummy);
