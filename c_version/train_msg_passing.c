@@ -118,191 +118,89 @@ float* compute_W(num_nbs, r, w, sigmaE){
     return W;
 }
 
-float** exc_act_update(float** exc_act_dummy, float** inh_act_dummy, int bs, int neuron_shape, int leaky,
-                       int num_E_nbs, int num_I_nbs, float* W_E, float* W_I, int** N_E, int** N_I){
-    float** b = malloc_matrix(bs, neuron_shape);
-    for (int k = 0; k < bs; k++){
-        float* r = malloc(sizeof(float) * neuron_shape);
-        for (int i = 0; i < neuron_shape; i++){
-            r[i] = - leaky * exc_act_dummy[k][i];
-            for (int j = 0; j < num_E_nbs; j++){
-                r[i] += W_E[j] * exc_act_dummy[k][N_E[i][j]];}
-            for (int j = 0; j < num_I_nbs; j++){
-                r[i] -= W_I[j] * inh_act_dummy[k][N_I[i][j]];}
-
-            b[k][i] = r[i];
-        }
-        free(r);
-    }
-    return b;
-}
-
-float** inh_act_update(float** exc_act_dummy, float** inh_act_dummy, int bs, int neuron_shape, int leaky,
-                       int num_E_nbs, float* W_E, int** N_E){
-    float** b = malloc_matrix(bs, neuron_shape);
-    for (int k = 0; k < bs; k++){
-        float* r = malloc(sizeof(float) * neuron_shape);
-        for (int i = 0; i < neuron_shape; i++){
-            r[i] = - leaky * inh_act_dummy[k][i];
-            for (int j = 0; j < num_E_nbs; j++){
-                r[i] += W_E[j] * exc_act_dummy[k][N_E[i][j]];}
-
-            b[k][i] = r[i];
-        }
-        free(r);
-    }
-    return b;
-}
-
-float** threshold_func(int bs, int neuron_shape, float threshold, float** exc_act){
-    float** m1 = malloc_matrix(bs, neuron_shape);
-    for (int i = 0; i < bs; i++) {
-        for (int j = 0; j < neuron_shape; j++) {
-            m1[i][j] = 0;
-        }
-    }
-
-    float** m2 = malloc_matrix(bs, neuron_shape);
-    for (int i = 0; i < bs; i++) {
-        for (int j = 0; j < neuron_shape; j++) {
-            m2[i][j] = 0;
-        }
-    }
-
-    float** exc_act2 = malloc_matrix(bs, neuron_shape);
-    for (int i = 0; i < bs; i++) {
-        for (int j = 0; j < neuron_shape; j++) {
-            exc_act2[i][j] = 0;
-        }
-    }
-
-    for (int i = 0; i < bs; i++){
-        for (int j = 0; j < neuron_shape; j++){
-            if (exc_act[i][j] - threshold > 0){
-                m1[i][j] = exc_act[i][j] - threshold;
-            }
-            else{
-                m1[i][j] = 0;
-            }
-        }
-    }
-
-    for (int i = 0; i < bs; i++){
-        for (int j = 0; j < neuron_shape; j++){
-            if (- exc_act[i][j] - threshold > 0){
-                m2[i][j] = - exc_act[i][j] - threshold;
-            }
-            else{
-                m2[i][j] = 0;
-            }
-        }
-    }
-
-    for (int i = 0; i < bs; i++){
-        for (int j = 0; j < neuron_shape; j++){
-            exc_act2[i][j] = m1[i][j] - m2[i][j];
-        }
-    }
-
-    free_matrix(bs, m1);
-
-    free_matrix(bs, m2);
-
-    return exc_act2;
-}
-
-float** stimulate(int neuron_shape, int bs, float lr_act, float threshold, float eps, float** stimulus, float** exc_act
-        , float** inh_act, float** exc_act_dummy, float** inh_act_dummy, int leaky,
-                  int num_E_nbs, int num_I_nbs, float* W_E, float* W_I, int** N_E, int** N_I){
-
-    float relative_error;
-
-    for (int t = 0; t < 50; t++){
-
-        float** exc_tm1 = copy_matrix(bs, neuron_shape, exc_act);
-
-        float** delta_a_exc = exc_act_update(exc_act_dummy, inh_act_dummy, bs, neuron_shape, leaky,
-                                             num_E_nbs, num_I_nbs, W_E, W_I, N_E, N_I);
-
-        float** delta_a_inh = inh_act_update(exc_act_dummy, inh_act_dummy, bs, neuron_shape, leaky,
-                                             num_E_nbs, W_E, N_E);
-
-        // Compute of exc_act;
-        float** stimulus_delta_exc = matrix_sum(bs, neuron_shape, stimulus, delta_a_exc);
-        free_matrix(bs, delta_a_exc);
-
-        scalar_matrix(bs, neuron_shape, lr_act, stimulus_delta_exc);
-
-        float** exc_act_new = matrix_sum(bs, neuron_shape, exc_act, stimulus_delta_exc);
-        free_matrix(bs, exc_act);
-        free_matrix(bs, stimulus_delta_exc);
-        exc_act = exc_act_new;
-
-        //compute of inh_act;
-        scalar_matrix(bs, neuron_shape, lr_act, delta_a_inh);
-
-        float** inh_act_new = matrix_sum(bs, neuron_shape, inh_act, delta_a_inh);
-        free_matrix(bs, inh_act);
-        free_matrix(bs, delta_a_inh);
-        inh_act = inh_act_new;
-
-        /*printf("exc_act = ");
-        print_matrix(bs, neuron_shape, exc_act);
-        printf("\n");*/
-
-        exc_act_new = threshold_func(bs, neuron_shape, threshold, exc_act);
-        free_matrix(bs, exc_act);
-        exc_act = exc_act_new;
-
-        inh_act_new = threshold_func(bs, neuron_shape, threshold, inh_act);
-        free_matrix(bs, inh_act);
-        inh_act = inh_act_new;
-
-        for (int i = 0; i < bs; i++){
-            for (int j = 0; j < neuron_shape; j++){
-                exc_act_dummy[i][j] = exc_act[i][j];
-                inh_act_dummy[i][j] = inh_act[i][j];
-            }
-        }
-
-        //printf("%d exc_act[1][1] = %f", t, exc_act[1][1]);
-        //print_matrix(bs, neuron_shape, exc_act);
-        //printf("\n");
-
-        float** da = matrix_minus(bs, neuron_shape, exc_act, exc_tm1);
-
-        float sqrt_da = 0;
-        for (int i = 0; i < bs; i++){
-            for (int j = 0; j < neuron_shape; j++){
-                sqrt_da += da[i][j] * da[i][j];
-            }
-        }
-        sqrt_da = sqrt(sqrt_da);
-
-        float sqrt_exc_tm1 = 0;
-        for (int i = 0; i < bs; i++){
-            for (int j = 0; j < neuron_shape; j++){
-                sqrt_exc_tm1 += exc_tm1[i][j] * exc_tm1[i][j];
-            }
-        }
-        sqrt_exc_tm1 = sqrt(sqrt_exc_tm1);
-
-        relative_error = sqrt_da / (eps + sqrt_exc_tm1);
-
-        free_matrix(bs, da);
-
-        free_matrix(bs, exc_tm1);
-    }
-
-    if (relative_error < eps){
-        printf("relative_error = %f\n", relative_error);
-        return exc_act;
+float max(float a, float b){
+    if (a >= b){
+        return a;
     }
     else{
-        printf("relative_error = %f ", relative_error);
-        printf("Update doesn't converge.");
-        return exc_act;
+        return b;
     }
+}
+
+float** stimulate(int neuron_shape, int bs, float lr_act, float threshold, float eps, float** stimulus,
+                  float** exc_act_dummy, float** inh_act_dummy, int leaky,
+                  int num_E_nbs, int num_I_nbs, float* W_E, float* W_I, int** N_E, int** N_I){
+
+    //float relative_error;
+
+    for (int t = 0; t < 50; t++) {
+
+        //float **exc_tm1 = copy_matrix(bs, neuron_shape+1, exc_act_dummy);
+
+        float delta_a_exc, delta_a_inh;
+
+        // Update of activations
+        for (int k = 0; k < bs; k++) {
+            for (int i = 0; i < neuron_shape; i++) {
+
+                //Update of exhibitory neurons;
+                delta_a_exc = - leaky * exc_act_dummy[k][i];
+                for (int j = 0; j < num_E_nbs; j++) {
+                    delta_a_exc += W_E[j] * exc_act_dummy[k][N_E[i][j]];
+                }
+                for (int j = 0; j < num_I_nbs; j++) {
+                    delta_a_exc -= W_I[j] * inh_act_dummy[k][N_I[i][j]];
+                }
+                delta_a_exc += stimulus[k][i];
+                delta_a_exc = lr_act * delta_a_exc;
+                exc_act_dummy[k][i] = exc_act_dummy[k][i] + delta_a_exc;
+                exc_act_dummy[k][i] = max(exc_act_dummy[k][i] - threshold, 0.0) - max(-exc_act_dummy[k][i] - threshold, 0.0);
+
+                //Update of inhibitory neurons;
+                delta_a_inh = - leaky * inh_act_dummy[k][i];
+                for (int j = 0; j < num_E_nbs; j++){
+                    delta_a_inh += W_E[j] * exc_act_dummy[k][N_E[i][j]];}
+                delta_a_inh = lr_act * delta_a_inh;
+                inh_act_dummy[k][i] = inh_act_dummy[k][i] + delta_a_inh;
+                inh_act_dummy[k][i] = max(inh_act_dummy[k][i] - threshold, 0.0) - max(-inh_act_dummy[k][i] - threshold, 0.0);
+
+            }
+        }
+
+//            float **da = matrix_minus(bs, neuron_shape+1, exc_act_dummy, exc_tm1);
+//
+//            float sqrt_da = 0;
+//            for (int i = 0; i < bs; i++) {
+//                for (int j = 0; j < neuron_shape; j++) {
+//                    sqrt_da += da[i][j] * da[i][j];
+//                }
+//            }
+//            sqrt_da = sqrt(sqrt_da);
+//
+//            float sqrt_exc_tm1 = 0;
+//            for (int i = 0; i < bs; i++) {
+//                for (int j = 0; j < neuron_shape; j++) {
+//                    sqrt_exc_tm1 += exc_tm1[i][j] * exc_tm1[i][j];
+//                }
+//            }
+//            sqrt_exc_tm1 = sqrt(sqrt_exc_tm1);
+//
+//            relative_error = sqrt_da / (eps + sqrt_exc_tm1);
+//
+//            free_matrix(bs, da);
+//
+//            free_matrix(bs, exc_tm1);
+    }
+    return exc_act_dummy;
+
+//        if (relative_error < eps) {
+//            printf("relative_error = %f\n", relative_error);
+//            return exc_act_dummy;
+//        } else {
+//            printf("relative_error = %f\n", relative_error);
+//            printf("Update doesn't converge.");
+//            return exc_act_dummy;
+//        }
 
 }
 
@@ -388,7 +286,7 @@ int main(int argc, char **argv) {
     int wi = 5;
     int we = 30;
     int leaky = wi + we;
-    int neuron_shape = 1600;
+    int neuron_shape = 400;
     int sigmaE = 3;
     int bs = 256;
     int imbed_dim = 97;
@@ -417,48 +315,54 @@ int main(int argc, char **argv) {
     float* W_E = compute_W(num_E_nbs, re, we, sigmaE);
     float* W_I = compute_W(num_I_nbs, ri, wi, sigmaE);
 
+    float** exc_act = malloc_matrix(bs, neuron_shape);
+    for (int i = 0; i < bs; i++) {
+        for (int j = 0; j < neuron_shape; j++) {
+            exc_act[i][j] = 0;
+        }
+    }
+
+    float** inh_act = malloc_matrix(bs, neuron_shape);
+    for (int i = 0; i < bs; i++) {
+        for (int j = 0; j < neuron_shape; j++) {
+            inh_act[i][j] = 0;
+        }
+    }
+
+    float** exc_act_dummy = malloc_matrix(bs, neuron_shape + 1);
+
+    float** inh_act_dummy = malloc_matrix(bs, neuron_shape + 1);
+
     for (int g = 0; g < gradient_step; g++){
 
         float** word_batch = sample_matrix(55529, imbed_dim, bs, mat);
-//        printf("word_batch = ");
-//        print_matrix(bs, imbed_dim, word_batch);
-//        printf("\n");
 
         float** stimulus = multiply(bs, imbed_dim, neuron_shape, word_batch, Phi);
 
-        float** exc_act = malloc_matrix(bs, neuron_shape);
-        for (int i = 0; i < bs; i++) {
-            for (int j = 0; j < neuron_shape; j++) {
-                exc_act[i][j] = 0;
-            }
-        }
-
-        float** inh_act = malloc_matrix(bs, neuron_shape);
-        for (int i = 0; i < bs; i++) {
-            for (int j = 0; j < neuron_shape; j++) {
-                inh_act[i][j] = 0;
-            }
-        }
-
-        float** exc_act_dummy = malloc_matrix(bs, neuron_shape + 1);
         for (int i = 0; i < bs; i++) {
             for (int j = 0; j < neuron_shape + 1; j++) {
                 exc_act_dummy[i][j] = 0;
             }
         }
 
-        float** inh_act_dummy = malloc_matrix(bs, neuron_shape + 1);
         for (int i = 0; i < bs; i++) {
             for (int j = 0; j < neuron_shape + 1; j++) {
                 inh_act_dummy[i][j] = 0;
             }
         }
 
-        exc_act = stimulate(neuron_shape, bs, lr_act, threshold, eps, stimulus, exc_act, inh_act, exc_act_dummy, inh_act_dummy,
-                            leaky, num_E_nbs, num_I_nbs, W_E, W_I, N_E, N_I);
+        exc_act_dummy = stimulate(neuron_shape, bs, lr_act, threshold, eps, stimulus,
+                                  exc_act_dummy, inh_act_dummy, leaky, num_E_nbs, num_I_nbs, W_E, W_I, N_E, N_I);
 
-        float dthreshold = l0_norm(bs, neuron_shape, exc_act) - l0_target;
+        float dthreshold = l0_norm(bs, neuron_shape, exc_act_dummy) - l0_target;
         threshold += 0.01 * dthreshold;
+
+        for (int i = 0; i < bs; i++){
+            for (int j = 0; j < neuron_shape; j++){
+                exc_act[i][j] = exc_act_dummy[i][j];
+                inh_act[i][j] = inh_act_dummy[i][j];
+            }
+        }
 
         //////////////////////// update of codebook
 
@@ -505,8 +409,6 @@ int main(int argc, char **argv) {
         printf("l0_loss = %f ", l0_loss);
         printf("l2_loss = %f;  ", l2_error);
         printf("threshold = %f;  \n", threshold);
-
-        free_matrix(bs, exc_act);
 
     }
 
