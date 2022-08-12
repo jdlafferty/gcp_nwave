@@ -288,6 +288,7 @@ int main(int argc, char **argv) {
         }
     }
 
+    //////// These parameters can be precomputed
     int num_E_nbs = get_num_nbs(re);
     int num_I_nbs = get_num_nbs(ri);
 
@@ -296,7 +297,9 @@ int main(int argc, char **argv) {
 
     float* W_E = compute_W(num_E_nbs, re, we, sigmaE);
     float* W_I = compute_W(num_I_nbs, ri, wi, sigmaE);
+    ///////////////// end
 
+    /////// These are all the malloc we need in training
     float** exc_act = malloc_matrix(bs, neuron_shape);
 
     float** exc_act_dummy = malloc_matrix(bs, neuron_shape + 1);
@@ -310,9 +313,11 @@ int main(int argc, char **argv) {
     float** gradient = malloc_matrix(imbed_dim, neuron_shape);
 
     float** word_batch = malloc_matrix(bs, imbed_dim);
+    ///////////////////// end
 
     for (int g = 0; g < gradient_step; g++){
 
+        // Sample word_batch (bs, imbed_dim) from word_embedding.csv
         sample_matrix(55529, imbed_dim, bs, mat, word_batch);
 
         for (int i = 0; i < bs; i++) {
@@ -345,6 +350,7 @@ int main(int argc, char **argv) {
         stimulate(neuron_shape, bs, lr_act, threshold, eps, stimulus,
                                   exc_act_dummy, inh_act_dummy, leaky, num_E_nbs, num_I_nbs, W_E, W_I, N_E, N_I);
 
+        // Update of threshold parameter
         float dthreshold = l0_norm(bs, neuron_shape, exc_act_dummy) - l0_target;
         threshold += 0.01 * dthreshold;
 

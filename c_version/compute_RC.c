@@ -62,7 +62,7 @@ int get_index_from_position(int xi, int yi, int xj, int yj, int r){
             free(l);
             return index;
         }
-        else if (yi < yj){
+        else {
             int index = core_index + (l[r]-1)/2 + diff + (l[r-(yi - yj)]+1)/2 + (xj - xi);
             free(l);
             return index;
@@ -419,6 +419,17 @@ float** update_Phi(float** word_batch, float** exc_act, int bs, int imbed_dim, i
     return Phi;
 }
 
+float std(int l, float* W){
+    float mean = sum(l, W) / l;
+    float r = 0.0;
+    for (int i = 0; i < l; i++){
+        r += (W[i] - mean) * (W[i] - mean);
+    }
+    r = sqrt(r / l);
+
+    return r;
+}
+
 
 int main() {
 
@@ -427,7 +438,7 @@ int main() {
     int wi = 5;
     int we = 30;
     int leaky = wi + we;
-    int neuron_shape = 1600;
+    int neuron_shape = 400;
     int sigmaE = 3;
     int imbed_dim = 97;
     float lr_act = 0.01;
@@ -468,8 +479,6 @@ int main() {
 
     float** stimulus1 = multiply(imbed_dim, imbed_dim, neuron_shape, batch, codebook);
 
-//    printf("stimulus1 = ");
-//    print_matrix(imbed_dim, neuron_shape, stimulus1);
 
     float** exc_act1 = malloc_matrix(imbed_dim, neuron_shape);
     for (int i = 0; i < imbed_dim; i++) {
