@@ -147,10 +147,12 @@ void stimulate(int neuron_shape, int bs, float lr_act, float threshold, float ep
         for (int k = 0; k < bs; k++) {
             for (int i = 0; i < neuron_shape; i++) {
 
-                //Update of exhibitory neurons;
+                //Update of exhibitory and inhibitory neurons;
                 delta_a_exc = - leaky * exc_act_dummy[k][i];
+                delta_a_inh = - leaky * inh_act_dummy[k][i];
                 for (int j = 0; j < num_E_nbs; j++) {
                     delta_a_exc += W_E[j] * exc_act_dummy[k][N_E[i][j]];
+                    delta_a_inh += W_E[j] * exc_act_dummy[k][N_E[i][j]];
                 }
                 for (int j = 0; j < num_I_nbs; j++) {
                     delta_a_exc -= W_I[j] * inh_act_dummy[k][N_I[i][j]];
@@ -160,10 +162,6 @@ void stimulate(int neuron_shape, int bs, float lr_act, float threshold, float ep
                 exc_act_dummy[k][i] = exc_act_dummy[k][i] + delta_a_exc;
                 exc_act_dummy[k][i] = max(exc_act_dummy[k][i] - threshold, 0.0) - max(-exc_act_dummy[k][i] - threshold, 0.0);
 
-                //Update of inhibitory neurons;
-                delta_a_inh = - leaky * inh_act_dummy[k][i];
-                for (int j = 0; j < num_E_nbs; j++){
-                    delta_a_inh += W_E[j] * exc_act_dummy[k][N_E[i][j]];}
                 delta_a_inh = lr_act * delta_a_inh;
                 inh_act_dummy[k][i] = inh_act_dummy[k][i] + delta_a_inh;
                 inh_act_dummy[k][i] = max(inh_act_dummy[k][i] - threshold, 0.0) - max(-inh_act_dummy[k][i] - threshold, 0.0);
