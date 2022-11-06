@@ -173,16 +173,3 @@ class L1ActDoubleDecker(_NeuronDynamicsModel):
         fname = fpath + "neurondynamics.pickle"
         with open(fname, 'rb') as f:
             self.threshold = pickle.load(f)
-
-
-
-    
-
-
-
-
-
-
-
-
-

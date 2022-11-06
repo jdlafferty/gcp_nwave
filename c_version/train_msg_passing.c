@@ -97,7 +97,7 @@ int ** compute_indexset(int r, int num_nbs, int neuron_shape){
     return set;
 }
 
-float* compute_W(int num_nbs, int r, int w, int sigmaE){
+float* compute_WE(int num_nbs, int r, int we, int sigmaE){
     float* W = malloc(sizeof(float) * num_nbs);
     int count = 0;
     for (int i = 0; i < (2*r+1)*(2*r+1); i++){
@@ -112,7 +112,28 @@ float* compute_W(int num_nbs, int r, int w, int sigmaE){
 
     float W_E_sum = sum(num_nbs, W);
     for (int i = 0; i < num_nbs; i++){
-        W[i] = w * W[i] / W_E_sum;
+        W[i] = we * W[i] / W_E_sum;
+    }
+
+    return W;
+}
+
+float* compute_WI(int num_nbs, int r, int wi){
+    float* W = malloc(sizeof(float) * num_nbs);
+    int count = 0;
+    for (int i = 0; i < (2*r+1)*(2*r+1); i++){
+        int xi = i / (2*r + 1);
+        int yi = i % (2*r + 1);
+        int distsq = (xi - r)* (xi - r) + (yi - r)* (yi - r);
+        if (distsq <= r*r){
+            W[count] = 1;
+            count += 1;
+        }
+    }
+
+    float W_E_sum = sum(num_nbs, W);
+    for (int i = 0; i < num_nbs; i++){
+        W[i] = wi * W[i] / W_E_sum;
     }
 
     return W;
@@ -132,6 +153,19 @@ void stimulate(int neuron_shape, int bs, float lr_act, float threshold, float ep
                int num_E_nbs, int num_I_nbs, float* W_E, float* W_I, int** N_E, int** N_I){
 
     //float relative_error;
+    float** exc_act_dummy_copy = malloc_matrix(bs, neuron_shape + 1);
+    for (int i = 0; i < bs; i++) {
+        for (int j = 0; j < neuron_shape + 1; j++) {
+            exc_act_dummy_copy[i][j] = 0;
+        }
+    }
+
+    float** inh_act_dummy_copy = malloc_matrix(bs, neuron_shape + 1);
+    for (int i = 0; i < bs; i++) {
+        for (int j = 0; j < neuron_shape + 1; j++) {
+            inh_act_dummy_copy[i][j] = 0;
+        }
+    }
 
     for (int t = 0; t < 50; t++) {
 
@@ -155,13 +189,20 @@ void stimulate(int neuron_shape, int bs, float lr_act, float threshold, float ep
                 }
                 delta_a_exc += stimulus[k][i];
                 delta_a_exc = lr_act * delta_a_exc;
-                exc_act_dummy[k][i] = exc_act_dummy[k][i] + delta_a_exc;
-                exc_act_dummy[k][i] = max(exc_act_dummy[k][i] - threshold, 0.0) - max(-exc_act_dummy[k][i] - threshold, 0.0);
+                exc_act_dummy_copy[k][i] = exc_act_dummy[k][i] + delta_a_exc;
+                exc_act_dummy_copy[k][i] = max(exc_act_dummy_copy[k][i] - threshold, 0.0) - max(-exc_act_dummy_copy[k][i] - threshold, 0.0);
 
                 delta_a_inh = lr_act * delta_a_inh;
-                inh_act_dummy[k][i] = inh_act_dummy[k][i] + delta_a_inh;
-                inh_act_dummy[k][i] = max(inh_act_dummy[k][i] - threshold, 0.0) - max(-inh_act_dummy[k][i] - threshold, 0.0);
+                inh_act_dummy_copy[k][i] = inh_act_dummy[k][i] + delta_a_inh;
+                inh_act_dummy_copy[k][i] = max(inh_act_dummy_copy[k][i] - threshold, 0.0) - max(-inh_act_dummy_copy[k][i] - threshold, 0.0);
 
+            }
+        }
+
+        for (int k = 0; k < bs; k++) {
+            for (int i = 0; i < neuron_shape; i++) {
+                exc_act_dummy[k][i] = exc_act_dummy_copy[k][i];
+                inh_act_dummy[k][i] = inh_act_dummy_copy[k][i];
             }
         }
 
@@ -198,6 +239,7 @@ void stimulate(int neuron_shape, int bs, float lr_act, float threshold, float ep
 //            printf("Update doesn't converge.");
 //            return exc_act_dummy;
 //        }
+
 
 }
 
@@ -294,8 +336,8 @@ int main(int argc, char **argv) {
     int** N_E = compute_indexset(re, num_E_nbs, neuron_shape);
     int** N_I = compute_indexset(ri, num_I_nbs, neuron_shape);
 
-    float* W_E = compute_W(num_E_nbs, re, we, sigmaE);
-    float* W_I = compute_W(num_I_nbs, ri, wi, sigmaE);
+    float* W_E = compute_WE(num_E_nbs, re, we, sigmaE);
+    float* W_I = compute_WI(num_I_nbs, ri, wi);
     ///////////////// end
 
     /////// These are all the malloc we need in training

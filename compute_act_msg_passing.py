@@ -443,6 +443,6 @@ if __name__ == "__main__":
     plot_word_activations(['universe', 'university', 'astronomy', 'college'], 'universe')
     plot_word_activations(['monarch', 'king', 'queen', 'female', 'prince', 'princess'], 'people')
     plot_word_activations(['cell', 'brain', 'organ', 'piano'], 'biology')
-    #plot_word_activations(['brain'],'apple_test')
+    plot_word_activations(['brain'],'apple_test')
 
 

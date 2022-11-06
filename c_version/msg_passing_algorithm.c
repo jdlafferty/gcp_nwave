@@ -61,7 +61,7 @@ int get_index_from_position(int xi, int yi, int xj, int yj, int r){
             free(l);
             return index;
         }
-        else if (yi < yj){
+        else {
             int index = core_index + (l[r]-1)/2 + diff + (l[r-(yi - yj)]+1)/2 + (xj - xi);
             free(l);
             return index;
@@ -97,7 +97,7 @@ int ** compute_indexset(r, num_nbs, neuron_shape){
     return set;
 }
 
-float* compute_W(num_nbs, r, w, sigmaE){
+float* compute_WE(int num_nbs, int r, int we, int sigmaE){
     float* W = malloc(sizeof(float) * num_nbs);
     int count = 0;
     for (int i = 0; i < (2*r+1)*(2*r+1); i++){
@@ -112,7 +112,28 @@ float* compute_W(num_nbs, r, w, sigmaE){
 
     float W_E_sum = sum(num_nbs, W);
     for (int i = 0; i < num_nbs; i++){
-        W[i] = w * W[i] / W_E_sum;
+        W[i] = we * W[i] / W_E_sum;
+    }
+
+    return W;
+}
+
+float* compute_WI(int num_nbs, int r, int wi){
+    float* W = malloc(sizeof(float) * num_nbs);
+    int count = 0;
+    for (int i = 0; i < (2*r+1)*(2*r+1); i++){
+        int xi = i / (2*r + 1);
+        int yi = i % (2*r + 1);
+        int distsq = (xi - r)* (xi - r) + (yi - r)* (yi - r);
+        if (distsq <= r*r){
+            W[count] = 1;
+            count += 1;
+        }
+    }
+
+    float W_E_sum = sum(num_nbs, W);
+    for (int i = 0; i < num_nbs; i++){
+        W[i] = wi * W[i] / W_E_sum;
     }
 
     return W;
@@ -177,23 +198,23 @@ int main(){
 //    int* l = get_struc(r);
 //    print_int_vector(2*r+1, l);
 
-    int r = 5;
-    int index = get_index_from_position(7, 5, 8, 8, r);
-    printf("index = %d\n", index);
+//    int r = 5;
+//    int index = get_index_from_position(7, 5, 8, 8, r);
+//    printf("index = %d\n", index);
 
     int** N_E = compute_indexset(re, num_E_nbs, neuron_shape);
     int** N_I = compute_indexset(ri, num_I_nbs, neuron_shape);
 
-    print_int_matrix(neuron_shape, num_E_nbs, N_E);
-    printf("\n");
-    print_int_matrix(neuron_shape, num_I_nbs, N_I);
-    printf("\n");
+//    print_int_matrix(neuron_shape, num_E_nbs, N_E);
+//    printf("\n");
+//    print_int_matrix(neuron_shape, num_I_nbs, N_I);
+//    printf("\n");
 
-    float* W_E = compute_W(num_E_nbs, re, we, sigmaE);
+    float* W_E = compute_WE(num_E_nbs, re, we, sigmaE);
     print_float_vector(num_E_nbs, W_E);
     printf("\n");
 
-    float* W_I = compute_W(num_I_nbs, ri, wi, sigmaE);
+    float* W_I = compute_WI(num_I_nbs, ri, wi);
     print_float_vector(num_I_nbs, W_I);
 
 }

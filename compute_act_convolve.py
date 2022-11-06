@@ -184,7 +184,8 @@ def load_test_batch(words):
 # Algorithms to update activations
 #####################################
 exck, inhk = get_kernels(re = re, ri = ri, we = we, wi = wi)
-#print("exck = " +str(exck))
+print("exck = " +str(exck))
+print("ink = " +str(inhk))
 
 exck = cp.expand_dims(cp.asarray(exck), axis = 0)
 inhk = cp.expand_dims(cp.asarray(inhk), axis = 0)
@@ -288,10 +289,10 @@ def plot_word_activations(words, filename=''):
 
 
 if __name__ == "__main__":
-    plot_word_activations(['technology', 'microsoft', 'intel', 'ibm', 'apple', 'banana'], 'tech')
-    plot_word_activations(['universe', 'university', 'astronomy', 'college'], 'universe')
-    plot_word_activations(['monarch', 'king', 'queen', 'female', 'prince', 'princess'], 'people')
-    plot_word_activations(['cell', 'brain', 'organ', 'piano'], 'biology')
-    #plot_word_activations(['brain'], 'apple_test')
+    # plot_word_activations(['technology', 'microsoft', 'intel', 'ibm', 'apple', 'banana'], 'tech')
+    # plot_word_activations(['universe', 'university', 'astronomy', 'college'], 'universe')
+    # plot_word_activations(['monarch', 'king', 'queen', 'female', 'prince', 'princess'], 'people')
+    # plot_word_activations(['cell', 'brain', 'organ', 'piano'], 'biology')
+    plot_word_activations(['brain'], 'apple_test')
 
 

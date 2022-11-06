@@ -1,5 +1,6 @@
 import numpy
 import numpy as np
+import scipy.linalg
 #import cupy as np
 #from cusignal.convolution.convolve import convolve
 from scipy.signal import convolve
@@ -147,6 +148,7 @@ for i in tbar:
     gradient = np.dot(np.transpose(error), activation)
     Phi += lr_Phi * (gradient - np.vstack(np.mean(gradient, axis=1)))
     Phi = Phi / np.maximum(np.sqrt(np.square(Phi).sum(axis=0)), 1e-8)
+    print("largest_singular_value = " +str(np.max(scipy.linalg.svdvals(Phi))))
 
     l0l = np.mean(np.abs(activation) > 1e-4)
     l1l = np.abs(activation).mean()

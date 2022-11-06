@@ -2,11 +2,21 @@
 <project version="4">
   <component name="ChangeListManager">
     <list default="true" id="f9c5ab65-424d-461e-91c0-7ef693f7c1d9" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/c_version/Phi.csv" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/Phi.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/c_version/RC.csv" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/RC.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/c_version/compute_RC.c" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/compute_RC.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/c_version/plot_RC.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/plot_RC.ipynb" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/c_version/.idea/c_version.iml" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/.idea/c_version.iml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/c_version/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/c_version/a.out" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/a.out" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/c_version/compute_act_msg_passing.c" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/compute_act_msg_passing.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/c_version/exc_act.csv" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/exc_act.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/c_version/msg_passing_algorithm.c" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/msg_passing_algorithm.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/c_version/test_between_C_and_python.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/test_between_C_and_python.ipynb" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/c_version/train_msg_passing.c" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/train_msg_passing.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/compute_act_convolve.py" beforeDir="false" afterPath="$PROJECT_DIR$/compute_act_convolve.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/compute_act_laplacian.py" beforeDir="false" afterPath="$PROJECT_DIR$/compute_act_laplacian.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/compute_act_msg_passing.py" beforeDir="false" afterPath="$PROJECT_DIR$/compute_act_msg_passing.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/nwave/neurondynamics.py" beforeDir="false" afterPath="$PROJECT_DIR$/nwave/neurondynamics.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_convolve.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_convolve.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_laplacian.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_laplacian.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -34,15 +44,63 @@
   </component>
   <component name="PropertiesComponent"><![CDATA[{
   "keyToString": {
+    "ACTIVE_CLOUD_PROJECT_ACCOUNT": "xinchen.du@yale.edu",
+    "ACTIVE_CLOUD_PROJECT_ID": "jl2994-nerualnet-project-aa1f",
+    "ACTIVE_CLOUD_PROJECT_NAME": "lafferty-neural-waves",
+    "ACTIVE_CLOUD_PROJECT_NUMBER": "731601512458",
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "com.google.cloudcode.ide_session_index": "20220811_0006",
+    "com.google.cloudcode.ide_session_index": "20221102_0003",
     "last_opened_file_path": "/Users/apple/ShanghaiTech/Yale/2022 summer research/project 1/nwave_gcp/gcp_nwave",
     "nodejs_package_manager_path": "npm"
   }
 }]]></component>
-  <component name="RunManager" selected="Python.test">
+  <component name="RunManager" selected="Python.compute_act_whole">
+    <configuration name="compute_act_whole" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="gcp_nwave" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/compute_act_whole.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="msg_passing_algorithm" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="gcp_nwave" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/msg_passing_algorithm.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
     <configuration name="test" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
       <module name="gcp_nwave" />
       <option name="INTERPRETER_OPTIONS" value="" />
@@ -57,6 +115,28 @@
       <option name="ADD_SOURCE_ROOTS" value="true" />
       <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
       <option name="SCRIPT_NAME" value="$PROJECT_DIR$/test.py" />
+      <option name="PARAMETERS" value="" />
+      <option name="SHOW_COMMAND_LINE" value="false" />
+      <option name="EMULATE_TERMINAL" value="false" />
+      <option name="MODULE_MODE" value="false" />
+      <option name="REDIRECT_INPUT" value="false" />
+      <option name="INPUT_FILE" value="" />
+      <method v="2" />
+    </configuration>
+    <configuration name="train_convolve" type="PythonConfigurationType" factoryName="Python" temporary="true" nameIsGenerated="true">
+      <module name="gcp_nwave" />
+      <option name="INTERPRETER_OPTIONS" value="" />
+      <option name="PARENT_ENVS" value="true" />
+      <envs>
+        <env name="PYTHONUNBUFFERED" value="1" />
+      </envs>
+      <option name="SDK_HOME" value="" />
+      <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$" />
+      <option name="IS_MODULE_SDK" value="true" />
+      <option name="ADD_CONTENT_ROOTS" value="true" />
+      <option name="ADD_SOURCE_ROOTS" value="true" />
+      <EXTENSION ID="PythonCoverageRunConfigurationExtension" runner="coverage.py" />
+      <option name="SCRIPT_NAME" value="$PROJECT_DIR$/train_convolve.py" />
       <option name="PARAMETERS" value="" />
       <option name="SHOW_COMMAND_LINE" value="false" />
       <option name="EMULATE_TERMINAL" value="false" />
@@ -89,8 +169,11 @@
     </configuration>
     <recent_temporary>
       <list>
-        <item itemvalue="Python.test" />
+        <item itemvalue="Python.compute_act_whole" />
+        <item itemvalue="Python.msg_passing_algorithm" />
         <item itemvalue="Python.train_laplacian" />
+        <item itemvalue="Python.train_convolve" />
+        <item itemvalue="Python.test" />
       </list>
     </recent_temporary>
   </component>
@@ -104,6 +187,18 @@
       <updated>1659474401174</updated>
       <workItem from="1659474403720" duration="4224000" />
       <workItem from="1659885336354" duration="2517000" />
+      <workItem from="1663559215602" duration="8727000" />
+      <workItem from="1663983741775" duration="7000" />
+      <workItem from="1665106629874" duration="680000" />
+      <workItem from="1665199833204" duration="297000" />
+      <workItem from="1665241546909" duration="1535000" />
+      <workItem from="1665541941646" duration="727000" />
+      <workItem from="1665543561661" duration="146000" />
+      <workItem from="1665712185786" duration="1051000" />
+      <workItem from="1665778956457" duration="226000" />
+      <workItem from="1666826796644" duration="1602000" />
+      <workItem from="1667330045657" duration="2719000" />
+      <workItem from="1667345681291" duration="812000" />
     </task>
     <servers />
   </component>
@@ -122,7 +217,10 @@
     </option>
   </component>
   <component name="com.intellij.coverage.CoverageDataManagerImpl">
-    <SUITE FILE_PATH="coverage/gcp_nwave$train_laplacian.coverage" NAME="train_laplacian Coverage Results" MODIFIED="1659498298299" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/gcp_nwave$train_laplacian.coverage" NAME="train_laplacian Coverage Results" MODIFIED="1665242153257" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
     <SUITE FILE_PATH="coverage/gcp_nwave$test.coverage" NAME="test Coverage Results" MODIFIED="1660244455652" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/gcp_nwave$train_convolve.coverage" NAME="train_convolve Coverage Results" MODIFIED="1663738047279" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/gcp_nwave$msg_passing_algorithm.coverage" NAME="msg_passing_algorithm Coverage Results" MODIFIED="1665712438308" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
+    <SUITE FILE_PATH="coverage/gcp_nwave$compute_act_whole.coverage" NAME="compute_act_whole Coverage Results" MODIFIED="1665712892302" SOURCE_PROVIDER="com.intellij.coverage.DefaultCoverageFileProvider" RUNNER="coverage.py" COVERAGE_BY_TEST_ENABLED="true" COVERAGE_TRACING_ENABLED="false" WORKING_DIRECTORY="$PROJECT_DIR$" />
   </component>
 </project>

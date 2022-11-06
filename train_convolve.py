@@ -1,8 +1,8 @@
 import numpy
-#import numpy as np
-import cupy as np
-from cusignal.convolution.convolve import convolve
-#from scipy.signal import convolve
+import numpy as np
+#import cupy as np
+#from cusignal.convolution.convolve import convolve
+from scipy.signal import convolve
 from tqdm import trange
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
@@ -16,7 +16,7 @@ we = 30
 leaky = wi + we
 bs = 256
 imbed_dim = 97
-neuron_shape = (20, 20)
+neuron_shape = (40, 40)
 lr_act = 0.01
 lr_Phi = 0.01
 l0_target = 0.1
@@ -99,6 +99,8 @@ tbar = trange(initial_step, initial_step + gradient_steps, desc='Training', leav
 exc_act = np.zeros(shape=(bs, neuron_shape[0], neuron_shape[1]))
 inh_act = np.zeros(shape=(bs, neuron_shape[0], neuron_shape[1]))
 
+print("Initial Phi = " + str(Phi))
+
 for i in tbar:
     word_batch = load_train_batch()
 
@@ -115,13 +117,11 @@ for i in tbar:
 
     ########### Update codebook
 
-
     fitted_value = np.dot(activation, np.transpose(Phi))
     error = word_batch - fitted_value
     gradient = np.dot(np.transpose(error), activation)
     Phi += lr_Phi * (gradient - np.vstack(np.mean(gradient, axis=1)))
     Phi = Phi / np.maximum(np.sqrt(np.square(Phi).sum(axis=0)), 1e-8)
-
 
     l0l = np.mean(np.abs(activation) > 1e-4)
     l1l = np.abs(activation).mean()
@@ -137,6 +137,7 @@ for i in tbar:
     l0_loss.append(float(l0l))
 
     if i % 100 == 0:
+        print("Phi = " +str(Phi))
         tbar.set_description("loss=%.3f sparsity=%2.2f%% threshold=%.3f" % \
                                      (l2l, 100 * l0l, threshold))
         tbar.refresh()
