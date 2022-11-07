@@ -1,4 +1,4 @@
-A cupy implementation of the nwave experiments.
+A cupy and FPGA implementation of the Nwave Dynamics Model.
 
 ## Directory Structure
 - nwave/ : implementation of nwave algorithms.
@@ -8,7 +8,7 @@ A cupy implementation of the nwave experiments.
     - utils.py : store many functions that will be used in other files
 
 - c_version/ : convert the program to c
-    
+  
     - makefile: to compile the c code
     - compute_act_laplacian.c: compute activations using laplacian matrix
     - compute_act_msg_passing: compute activations using  message passing algorithm

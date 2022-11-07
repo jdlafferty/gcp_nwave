@@ -1,0 +1,1 @@
+CMakeLists.txt not found in /Users/apple/ShanghaiTech/Yale/2022 summer research/project 1/nwave_gcp/gcp_nwave/c_version Select CMakeLists.txt
