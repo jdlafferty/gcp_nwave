@@ -1,0 +1,4 @@
+import "nn4.act";
+
+
+grid<8,3,2> g;
