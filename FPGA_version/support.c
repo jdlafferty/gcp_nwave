@@ -210,7 +210,7 @@ int get_stim (int argc, long *args)
   float** Phi = read_matrix(97, 1600, "codebook.csv");
   float** stimulus = multiply(args[2], 97, args[3], word_batch, Phi); 
 
-  int l = args[0] * shape + args[1] + 1;
+  int l = args[0] * shape + args[1];
   printf ("l = %d; \n", l);
   f = stimulus[0][l];  // For simplicity, I choose the first row of the stimuli matrix.
   printf ("stimulus[0][%d] = %f\n", l, f);
