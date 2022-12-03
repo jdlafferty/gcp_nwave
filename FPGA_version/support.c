@@ -215,7 +215,11 @@ int init_stim (int argc, long *args)
   if (_internal_stimulus) {
     free (_internal_stimulus);
   }
-  _internal_stimulus = read_matrix(args[0], args[1], "stimulus_row2.csv");
+  float** mat = read_matrix(55529, 97, "word_embeddings.csv");
+  float** word_batch = sample_matrix1(55529, 97, args[0], mat);
+  float** Phi = read_matrix(97, args[1], "codebook.csv");
+  _internal_stimulus = multiply(args[0], 97, args[1], word_batch, Phi); 
+  //_internal_stimulus = read_matrix(args[0], args[1], "stimulus_row2.csv");
 
   return 0;
 }
