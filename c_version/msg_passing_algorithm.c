@@ -110,6 +110,9 @@ float* compute_WE(int num_nbs, int r, int we, int sigmaE){
         }
     }
 
+    int l = (num_nbs-1)/2;
+    W[l] = 0;
+
     float W_E_sum = sum(num_nbs, W);
     for (int i = 0; i < num_nbs; i++){
         W[i] = we * W[i] / W_E_sum;
@@ -130,6 +133,9 @@ float* compute_WI(int num_nbs, int r, int wi){
             count += 1;
         }
     }
+
+    int l = (num_nbs-1)/2;
+    W[l] = 0;
 
     float W_E_sum = sum(num_nbs, W);
     for (int i = 0; i < num_nbs; i++){

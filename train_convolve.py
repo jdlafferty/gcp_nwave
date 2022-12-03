@@ -137,7 +137,8 @@ for i in tbar:
     l0_loss.append(float(l0l))
 
     if i % 100 == 0:
-        print("Phi = " +str(Phi))
+        #print("Phi = " +str(Phi))
+        print((np.linalg.norm(np.dot(np.transpose(Phi), Phi))))
         tbar.set_description("loss=%.3f sparsity=%2.2f%% threshold=%.3f" % \
                                      (l2l, 100 * l0l, threshold))
         tbar.refresh()

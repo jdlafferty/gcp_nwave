@@ -3,6 +3,23 @@
   <component name="ChangeListManager">
     <list default="true" id="f9c5ab65-424d-461e-91c0-7ef693f7c1d9" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FPGA_version/.actsim_history" beforeDir="false" afterPath="$PROJECT_DIR$/FPGA_version/.actsim_history" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FPGA_version/nn4.act" beforeDir="false" afterPath="$PROJECT_DIR$/FPGA_version/nn4.act" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FPGA_version/support" beforeDir="false" afterPath="$PROJECT_DIR$/FPGA_version/support" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FPGA_version/support.c" beforeDir="false" afterPath="$PROJECT_DIR$/FPGA_version/support.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FPGA_version/support.o" beforeDir="false" afterPath="$PROJECT_DIR$/FPGA_version/support.o" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FPGA_version/support.so" beforeDir="false" afterPath="$PROJECT_DIR$/FPGA_version/support.so" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FPGA_version/x.conf" beforeDir="false" afterPath="$PROJECT_DIR$/FPGA_version/x.conf" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/c_version/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/c_version/a.out" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/a.out" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/c_version/compute_act_msg_passing.c" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/compute_act_msg_passing.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/c_version/exc_act.csv" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/exc_act.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/c_version/msg_passing_algorithm.c" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/msg_passing_algorithm.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/c_version/read_csv.c" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/read_csv.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/c_version/stimulus.csv" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/stimulus.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/parameter.csv" beforeDir="false" afterPath="$PROJECT_DIR$/parameter.csv" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_convolve.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_convolve.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_laplacian.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_laplacian.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -37,7 +54,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "com.google.cloudcode.ide_session_index": "20221102_0003",
+    "com.google.cloudcode.ide_session_index": "20221129_0003",
     "last_opened_file_path": "/Users/apple/ShanghaiTech/Yale/2022 summer research/project 1/nwave_gcp/gcp_nwave",
     "nodejs_package_manager_path": "npm"
   }
@@ -185,6 +202,9 @@
       <workItem from="1666826796644" duration="1602000" />
       <workItem from="1667330045657" duration="2719000" />
       <workItem from="1667345681291" duration="1227000" />
+      <workItem from="1668197535854" duration="1940000" />
+      <workItem from="1669090950444" duration="3415000" />
+      <workItem from="1669210258258" duration="1111000" />
     </task>
     <servers />
   </component>

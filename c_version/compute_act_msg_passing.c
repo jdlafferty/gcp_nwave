@@ -4,6 +4,22 @@
 #include "matrix_float.c"
 #include "read_csv.c"
 
+#define FIX_POINT_A 8
+#define FIX_POINT_B 17
+
+int convert_to_fix_point (float f){
+    int tmp;
+
+    if (f >= 0) {
+        tmp = (int) (f * (1 << FIX_POINT_B) + 0.5);
+    }
+    else {
+        tmp = (int) ((-f) * (1 << FIX_POINT_B) + 0.5);
+        tmp = (1 << (FIX_POINT_A + FIX_POINT_B)) - tmp;
+    }
+    return tmp;
+}
+
 ////////////
 /// These functions can be precomputed:
 void print_int_matrix(int row, int col, int** m) {
@@ -113,6 +129,9 @@ float* compute_WE(int num_nbs, int r, int we, int sigmaE){
         }
     }
 
+    int l = (num_nbs-1)/2;
+    W[l] = 0;
+
     float W_E_sum = sum(num_nbs, W);
     for (int i = 0; i < num_nbs; i++){
         W[i] = we * W[i] / W_E_sum;
@@ -133,6 +152,9 @@ float* compute_WI(int num_nbs, int r, int wi){
             count += 1;
         }
     }
+
+    int l = (num_nbs-1)/2;
+    W[l] = 0;
 
     float W_E_sum = sum(num_nbs, W);
     for (int i = 0; i < num_nbs; i++){
@@ -171,18 +193,30 @@ void stimulate(int neuron_shape, int bs, float lr_act, float threshold, float ep
         }
     }
 
-    for (int t = 0; t < 50; t++) {
+    for (int t = 0; t < 30; t++) {
 
         //float **exc_tm1 = copy_matrix(bs, neuron_shape+1, exc_act_dummy);
 
         float delta_a_exc, delta_a_inh;
+
+        int count = 0;
 
         // Update of activations
         for (int k = 0; k < bs; k++) {
             for (int i = 0; i < neuron_shape; i++) {
 
                 //Update of exhibitory and inhibitory neurons;
+
+//                int x = i/40;
+//                int y = i - 40 * x;
+//                if (x == 31 && y == 31){
+//                    printf("iter = %d, exc_act_dummy[%d][%d] = %d\n",t, x, y, convert_to_fix_point(exc_act_dummy[k][i]));
+//                    printf("iter = %d, leaky_exc_act_dummy[%d][%d] = %d\n",t, x, y, convert_to_fix_point(leaky * exc_act_dummy[k][i]));}
                 delta_a_exc = - leaky * exc_act_dummy[k][i];
+//                int x = i/40;
+//                int y = i - 40 * x;
+//                if (x == 31 && y == 31){
+//                printf("iter = %d, -delta_a_exc[%d][%d] = %d\n",t, x, y, convert_to_fix_point(delta_a_exc));}
                 delta_a_inh = - leaky * inh_act_dummy[k][i];
                 for (int j = 0; j < num_E_nbs; j++) {
                     delta_a_exc += W_E[j] * exc_act_dummy[k][N_E[i][j]];
@@ -192,9 +226,26 @@ void stimulate(int neuron_shape, int bs, float lr_act, float threshold, float ep
                     delta_a_exc -= W_I[j] * inh_act_dummy[k][N_I[i][j]];
                 }
                 delta_a_exc += stimulus[k][i];
+                //printf("delta_a_exc = %f\n", delta_a_exc);
                 delta_a_exc = lr_act * delta_a_exc;
+                //printf("delta_a_exc = %f\n", delta_a_exc);
+                //printf("exc_act_dummy[%d][%d] = %f\n",k, i, exc_act_dummy[k][i]);
                 exc_act_dummy_copy[k][i] = exc_act_dummy[k][i] + delta_a_exc;
+                //printf("exc_act_dummy_copy[%d][%d] = %f\n",k, i, exc_act_dummy_copy[k][i]);
+//                if (exc_act_dummy_copy[k][i] > 0.01024 || exc_act_dummy_copy[k][i] < -0.01024){
+//                    count+=1;
+//                }
                 exc_act_dummy_copy[k][i] = max(exc_act_dummy_copy[k][i] - threshold, 0.0) - max(-exc_act_dummy_copy[k][i] - threshold, 0.0);
+//                if (exc_act_dummy_copy[k][i] != 0){
+//                    count+=1;
+//                }
+
+//                if (exc_act_dummy_copy[k][i] != 0){
+//                    count+=1;
+//                    int x = i/40;
+//                    int y = i - 40 * x;
+//                printf("iter %d: exc_act_dummy_copy[%d][%d] = %d\n",t, x, y, convert_to_fix_point(exc_act_dummy_copy[k][i]));}
+
 
                 delta_a_inh = lr_act * delta_a_inh;
                 inh_act_dummy_copy[k][i] = inh_act_dummy[k][i] + delta_a_inh;
@@ -202,6 +253,9 @@ void stimulate(int neuron_shape, int bs, float lr_act, float threshold, float ep
 
             }
         }
+
+
+        printf("count = %d\n", count);
 
         for (int k = 0; k < bs; k++) {
             for (int i = 0; i < neuron_shape; i++) {
@@ -258,15 +312,17 @@ int main() {
     int leaky = wi + we;
     int neuron_shape = 1600;
     int sigmaE = 3;
-    int bs = 256;
+    int bs = 2;
     int imbed_dim = 97;
-    float lr_act = 0.01;
-    float threshold = 0.01;
+    float lr_act = 0.01024;
+    float threshold = 0.01024;
     float eps = 5e-3;
 
     // precomputed parameters
     int num_E_nbs = get_num_nbs(re);
     int num_I_nbs = get_num_nbs(ri);
+//    printf("num_E_nbs = %d", num_E_nbs);
+//    printf("num_I_nbs = %d", num_I_nbs);
 
     int** N_E = compute_indexset(re, num_E_nbs, neuron_shape);
     int** N_I = compute_indexset(ri, num_I_nbs, neuron_shape);
@@ -274,11 +330,17 @@ int main() {
     float* W_E = compute_WE(num_E_nbs, re, we, sigmaE);
     float* W_I = compute_WI(num_I_nbs, ri, wi);
 
+//    print_float_vector(num_E_nbs, W_E);
+//    printf("\n");
+//    print_float_vector(num_I_nbs, W_I);
+
     // Read Files, and stimulus can also be precomputed
     float** mat = read_matrix(55529, imbed_dim, "word_embeddings.csv");
     float** word_batch = sample_matrix1(55529, imbed_dim, bs, mat);
+    //print_matrix(bs, imbed_dim, mat);
 
-    float** Phi = read_matrix(97, 1600, "codebook.csv");
+    float** Phi = read_matrix(97, neuron_shape, "codebook.csv");
+    //print_matrix(97, neuron_shape, Phi);
 
     float** stimulus = multiply(bs, imbed_dim, neuron_shape, word_batch, Phi);  // (256, 1600)
     write_matrix(bs, neuron_shape, stimulus, "stimulus.csv");
@@ -302,9 +364,24 @@ int main() {
     stimulate(neuron_shape, bs, lr_act, threshold, eps, stimulus,
                               exc_act_dummy, inh_act_dummy, leaky, num_E_nbs, num_I_nbs, W_E, W_I, N_E, N_I);
 
+    int count1 = 0;
+    for (int i  = 0; i < bs; i++){
+        for (int j = 0; j < neuron_shape; j++){
+            if (i == 1){
+            int x = j/40;
+            int y = j - 40 * x;
+            if (exc_act_dummy[i][j] != 0 ){
+                count1 += 1;
+            printf("exc_act_dummy[%d][%d] = %d\n", x, y, convert_to_fix_point(exc_act_dummy[i][j]));}}
+        }
+    }
+
+    printf("count1 = %d", count1);
+
+
     //print_matrix(bs, neuron_shape, exc_act_dummy);
 
-    write_matrix(bs, neuron_shape, exc_act_dummy, "exc_act.csv");
+    //write_matrix(bs, neuron_shape, exc_act_dummy, "exc_act.csv");
 
     return 0;
 }

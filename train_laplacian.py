@@ -148,7 +148,7 @@ for i in tbar:
     gradient = np.dot(np.transpose(error), activation)
     Phi += lr_Phi * (gradient - np.vstack(np.mean(gradient, axis=1)))
     Phi = Phi / np.maximum(np.sqrt(np.square(Phi).sum(axis=0)), 1e-8)
-    print("largest_singular_value = " +str(np.max(scipy.linalg.svdvals(Phi))))
+    #print("largest_singular_value = " +str(np.max(scipy.linalg.svdvals(Phi))))
 
     l0l = np.mean(np.abs(activation) > 1e-4)
     l1l = np.abs(activation).mean()
@@ -161,7 +161,7 @@ for i in tbar:
     l0_loss.append(float(l0l))
 
     if i % 100 == 0:
-        #print(str(i) + ". Phi = " + str(Phi))
+        print((np.linalg.norm(np.dot(np.transpose(Phi), Phi))))
         tbar.set_description("loss=%.3f sparsity=%2.2f%% threshold=%.3f" % \
                                      (l2l, 100 * l0l, threshold))
         tbar.refresh()

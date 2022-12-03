@@ -26,26 +26,31 @@ open math;
 //      e    e    e    e
 //
 
-pint A = 4, B = 6;
+pint A = 8, B = 17;
 pint TOT = A + B;
-pint wi = 5, we = 30, leaky = 35;
-pint threshold = 1;  // How to express 0.01 in fixed point way? (threshold = 0.01)
-pint lr_act = 1;   // How to express 0.01 in fixed point way? (lr_act = 0.01)
+pint leaky = 35 * 131072;   // 35*2^17; 
+pint threshold = 1311;  // How to express 0.01 in fixed point way? (threshold = 0.01 * (2**B))
+pint lr_act = 1311;   // How to express 0.01 in fixed point way? (lr_act = 0.01 * (2**B))
+pint batch_size = 1;
+
+pint f = 16373; // This is the value of the softmax function.
+pint test_variable = 16381;
+pint test_variable2 = 16382;
 
 template<pint A,B>
-function softmax(int<A+B> val, threshold) : int<TOT>
+function softmax(int<A+B> val, threshold) : int<A+B>
 {
-  // assume that threshold is always > 0
- chp-txt {
-   select {
-   case fxp::le<A,B>(threshold,val) & fxp::positive<A,B>(val):
-	self := fxp::sub<A,B>(val,threshold);
-   case fxp::le<A,B>(val,fxp::uminus<A,B>(threshold)) & fxp::negative<A,B>(val):
-	self := fxp::add<A,B>(val,threshold);
-   else:
-	self := 0
-   } 
- }}
+   // assume that threshold is always > 0
+  chp-txt {
+    select {
+    case fxp::le<A,B>(threshold,val) & fxp::positive<A,B>(val):
+     self := fxp::sub<A,B>(val,threshold);
+    case fxp::le<A,B>(threshold,fxp::uminus<A,B>(val)) & fxp::negative<A,B>(val):
+     self := fxp::add<A,B>(val,threshold);
+    else:
+     self := 0
+    }
+  }}
 
 template<pint L_e; pint wE[L_e];  // excitatory weights
          pint L_i; pint wI[L_i]   // inhibitory weights
@@ -76,22 +81,37 @@ defproc gridpoint (chan?(int<TOT>) init; chan!(int<TOT>) final;
       init?stim;
 
       // run loop 50 times
-      while (i < 50) {
+      while (i < 30) {
+
 	  (, j : L_e : inE[j]?dinE[j] ), (, j : L_e : outE[j]!x_exc ),
           (, j : L_i : inI[j]?dinI[j] ), (, j : L_i : outI[j]!x_inh );
 	    
 	// I have sent my local value out, and received values from my four neighbors
 	
 	// local update rule
-        
+
+        //log("iter = ", i, "; x_exc = ", x_exc);
         delta_x_exc := fxp::mults<A,B>(leaky, x_exc);
+        //log("iter = ", i, "; leaky_delta_x_exc = ", delta_x_exc);
         delta_x_exc := fxp::uminus<A,B>(delta_x_exc);
+        //log("iter = ", i, "; -leaky_delta_x_exc = ", delta_x_exc);
         (; j : L_e : delta_x_exc := fxp::add<A,B>(delta_x_exc, fxp::mults<A,B>(wE[j],dinE[j])) );
         (; j : L_i : delta_x_exc := fxp::sub<A,B>(delta_x_exc, fxp::mults<A,B>(wI[j],dinI[j])) );
+
+        //log("iter = ", i, "; delta_x_exc = ", delta_x_exc);
+
         delta_x_exc :=  fxp::add<A,B>(delta_x_exc, stim);
+
+        //log("iter = ", i, "; delta_x_exc1 = ", delta_x_exc); 
+
         delta_x_exc :=  fxp::mults<A, B>(lr_act, delta_x_exc);
+
+        //log("iter = ", i, "; delta_x_exc2 = ", delta_x_exc); 
+
         x_exc := fxp::add<A,B>(delta_x_exc, x_exc); 
         x_exc := softmax<A, B>(x_exc, threshold);
+
+        //log("iter = ", i, "; x_exc = ", x_exc); 
         
         delta_x_inh := fxp::mults<A,B>(leaky, x_inh);
         delta_x_inh := fxp::uminus<A,B>(delta_x_inh);
@@ -99,6 +119,8 @@ defproc gridpoint (chan?(int<TOT>) init; chan!(int<TOT>) final;
         delta_x_inh := fxp::mults<A,B>(delta_x_inh, lr_act); 
         x_inh := fxp::add<A,B>(delta_x_inh, x_inh); 
         x_inh := softmax<A, B>(x_inh, threshold);
+
+        // log("iter = ", i, "; x_exc = ", x_exc, "; x_inh = ", x_inh);
       
         i := i + 1
       };
@@ -130,9 +152,10 @@ function set_num_weights (pint x) : pbool;
 function set_weight (pint i, dx, dy; pbool is_excite) : pbool;
 function get_exc_weight (pint idx) : pint;
 function get_inh_weight (pint idx) : pint;
+function init_stim (pint x, y) : pint;
 
 // returns stimulus for (x,y)
-function get_stim (pint x, y, batch_size ,shape) : pint;
+function get_stim (pint batch_size ,shape) : pint;
 
 function within_radius(pint x, y, R) : pbool
 {
@@ -297,13 +320,66 @@ defproc grid()
 
     int v, idx;
 
+    int threshold_result;
+    int test_result;
+    int test_result2;
+    int test_result3;
+
   chp-txt {
     idx := 0;
-    while (idx < 2) {
+
+    //threshold_result := softmax<A, B>(f, threshold);
+    //log("threshold_result = ", threshold_result, ";");  // I output the result of softmax function here.
+
+    test_result := fxp::mults<A,B>(leaky, test_variable);   // leaky = 35*1024; test_variable = 16381;
+    log("leaky * test_variable = ", test_result);   // 16375
+
+    test_result2 := fxp::add<A,B>(test_variable, test_variable2);   // test_variable2 = 16382;
+    log("test_variable + test_variable2 = ", test_result2);   // 16379
+
+    test_result3 := fxp::sub<A,B>(test_variable, test_variable2);   // 
+    log("test_variable - test_variable2 = ", test_result3);   // 16383
+
+
+      log("Le = ", Le);
+      log("Li = ", Li);
+
+      log("WeightE[", 0, "]=", wE[0]);
+      log("WeightE[", 1, "]=", wE[1]);
+      log("WeightE[", 2, "]=", wE[2]);
+      log("WeightE[", 3, "]=", wE[3]);
+      log("WeightE[", 4, "]=", wE[4]);
+      log("WeightE[", 5, "]=", wE[5]);
+      log("WeightE[", 6, "]=", wE[6]);
+      log("WeightE[", 7, "]=", wE[7]);
+      log("WeightE[", 8, "]=", wE[8]);
+      log("WeightE[", 9, "]=", wE[9]);
+      log("WeightE[", 10, "]=", wE[10]);
+      log("WeightE[", 11, "]=", wE[11]);
+      log("WeightE[", 12, "]=", wE[12]);
+      log("WeightE[", 13, "]=", wE[13]);
+      log("WeightE[", 14, "]=", wE[14]);
+      log("WeightE[", 15, "]=", wE[15]);
+      log("WeightE[", 16, "]=", wE[16]);
+      log("WeightE[", 17, "]=", wE[17]);
+      log("WeightE[", 18, "]=", wE[18]);
+      log("WeightE[", 19, "]=", wE[19]);
+      log("WeightE[", 20, "]=", wE[20]);
+      log("WeightE[", 21, "]=", wE[21]);
+      log("WeightE[", 22, "]=", wE[22]);
+      log("WeightE[", 23, "]=", wE[23]);
+      log("WeightE[", 24, "]=", wE[24]);
+      log("WeightE[", 25, "]=", wE[25]);
+      log("WeightE[", 26, "]=", wE[26]);
+      log("WeightE[", 27, "]=", wE[27]);
+
+    while (idx < 1) {
+     v := init_stim (batch_size, N*N);
     (,i: N :
-     (,j: N : a[i][j].init!get_stim (i,j, 256, 1600)
+     (,j: N : a[i][j].init!get_stim (i,j)   // 1 -> batch_size; 1600 -> N * N.
       )
      );
+
     //  a[0][0].init!0, a[0][1].init!1, a[0][2].init!2, a[0][3].init!3,
     //  a[1][0].init!1, a[1][1].init!2, a[1][2].init!3, etc.
 
