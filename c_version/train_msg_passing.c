@@ -322,7 +322,7 @@ int main(int argc, char **argv) {
 
     float** mat = read_matrix(55529, imbed_dim, "word_embeddings.csv");
 
-    float** Phi = malloc_matrix(imbed_dim, neuron_shape);
+    float** Phi = malloc_matrix(imbed_dim, neuron_shape);    // This is the codebook we need to train. This is our final goal.
     for (int i = 0; i < imbed_dim; i++) {
         for (int j = 0; j < neuron_shape; j++) {
             Phi[i][j] = 0.3 * rand()/(RAND_MAX+1.0);
@@ -347,13 +347,13 @@ int main(int argc, char **argv) {
 
     float** inh_act_dummy = malloc_matrix(bs, neuron_shape + 1);
 
-    float** stimulus = malloc_matrix(bs, neuron_shape);
+    float** stimulus = malloc_matrix(bs, neuron_shape);  // word_batch @ Phi
 
-    float** fitted_value = malloc_matrix(bs, imbed_dim);
+    float** fitted_value = malloc_matrix(bs, imbed_dim);   // exc_act @ Phi.T
 
     float** gradient = malloc_matrix(imbed_dim, neuron_shape);
 
-    float** word_batch = malloc_matrix(bs, imbed_dim);
+    float** word_batch = malloc_matrix(bs, imbed_dim);  // randomly choose batch_size rows in the word_embeddings.csv file
     ///////////////////// end
 
     for (int g = 0; g < gradient_step; g++){

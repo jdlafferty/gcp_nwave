@@ -4,7 +4,7 @@
 #include "matrix_float.c"
 #include "read_csv.c"
 
-#define FIX_POINT_A 8
+#define FIX_POINT_A 7
 #define FIX_POINT_B 17
 
 int convert_to_fix_point (float f){
@@ -193,13 +193,13 @@ void stimulate(int neuron_shape, int bs, float lr_act, float threshold, float ep
         }
     }
 
-    for (int t = 0; t < 30; t++) {
+    for (int t = 0; t < 50; t++) {
 
         //float **exc_tm1 = copy_matrix(bs, neuron_shape+1, exc_act_dummy);
 
         float delta_a_exc, delta_a_inh;
 
-        int count = 0;
+        //int count = 0;
 
         // Update of activations
         for (int k = 0; k < bs; k++) {
@@ -255,7 +255,7 @@ void stimulate(int neuron_shape, int bs, float lr_act, float threshold, float ep
         }
 
 
-        printf("count = %d\n", count);
+        //printf("count = %d\n", count);
 
         for (int k = 0; k < bs; k++) {
             for (int i = 0; i < neuron_shape; i++) {
@@ -312,10 +312,10 @@ int main() {
     int leaky = wi + we;
     int neuron_shape = 1600;
     int sigmaE = 3;
-    int bs = 2;
+    int bs = 1;
     int imbed_dim = 97;
-    float lr_act = 0.01024;
-    float threshold = 0.01024;
+    float lr_act = 0.01;
+    float threshold = 0.01;
     float eps = 5e-3;
 
     // precomputed parameters
@@ -367,12 +367,12 @@ int main() {
     int count1 = 0;
     for (int i  = 0; i < bs; i++){
         for (int j = 0; j < neuron_shape; j++){
-            if (i == 1){
             int x = j/40;
             int y = j - 40 * x;
             if (exc_act_dummy[i][j] != 0 ){
                 count1 += 1;
-            printf("exc_act_dummy[%d][%d] = %d\n", x, y, convert_to_fix_point(exc_act_dummy[i][j]));}}
+            //printf("exc_act_dummy[%d][%d] = %d\n", x, y, convert_to_fix_point(exc_act_dummy[i][j]));}}
+            printf("exc_act_dummy[%d][%d] = %f\n", x, y, exc_act_dummy[i][j]);}
         }
     }
 

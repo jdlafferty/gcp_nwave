@@ -9,6 +9,8 @@ from matplotlib.patches import Rectangle
 plt.rcParams['figure.figsize'] = (8, 6)  # set default size of plots
 plt.rcParams['image.interpolation'] = 'nearest'
 
+import time
+
 ri = 5
 re = 3
 wi = 5
@@ -16,7 +18,7 @@ we = 30
 leaky = wi + we
 bs = 256
 imbed_dim = 97
-neuron_shape = (40, 40)
+neuron_shape = (20, 20)
 lr_act = 0.01
 lr_Phi = 0.01
 l0_target = 0.1
@@ -99,7 +101,9 @@ tbar = trange(initial_step, initial_step + gradient_steps, desc='Training', leav
 exc_act = np.zeros(shape=(bs, neuron_shape[0], neuron_shape[1]))
 inh_act = np.zeros(shape=(bs, neuron_shape[0], neuron_shape[1]))
 
-print("Initial Phi = " + str(Phi))
+#print("Initial Phi = " + str(Phi))
+
+ISTA_time = 0
 
 for i in tbar:
     word_batch = load_train_batch()
@@ -107,7 +111,10 @@ for i in tbar:
     stimulus = np.dot(word_batch, Phi).reshape((bs, neuron_shape[0], neuron_shape[1]))  # stimulus: (256, 20， 20)
     # Get neuron activity
 
+    start = time.time()
     activation = stimulate(stimulus, exc_act, inh_act)
+    end = time.time()
+    ISTA_time += end - start
 
     activation = activation.reshape(bs, neuron_shape[0] * neuron_shape[1])
 
@@ -138,11 +145,13 @@ for i in tbar:
 
     if i % 100 == 0:
         #print("Phi = " +str(Phi))
-        print((np.linalg.norm(np.dot(np.transpose(Phi), Phi))))
+        #print((np.linalg.norm(np.dot(np.transpose(Phi), Phi))))
         tbar.set_description("loss=%.3f sparsity=%2.2f%% threshold=%.3f" % \
                                      (l2l, 100 * l0l, threshold))
         tbar.refresh()
 
+
+print("ISTA Running time = " + str(ISTA_time))
 
 batch = np.eye(imbed_dim)
 batch = batch - numpy.mean(batch, axis=1)

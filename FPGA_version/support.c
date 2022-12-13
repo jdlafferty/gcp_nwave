@@ -7,8 +7,25 @@
 static int num_weights = 0;
 static double *weights = NULL;
 
-#define FIX_POINT_A 8
+#define FIX_POINT_A 7
 #define FIX_POINT_B 17
+
+float** sample_matrix(int row, int col, int sample_size, float** m) {
+    float** sample = malloc(sizeof(float*) * sample_size);
+    for (int i = 0; i < sample_size; i++) {
+         sample[i] = malloc(sizeof(float) * col);
+     }
+
+    for (int i = 0; i < sample_size; i++) {
+        int m_row = rand() % row;
+        printf("row = %d\n", m_row);
+        for (int j = 0; j < col; j++) {
+            sample[i][j] = m[m_row][j];
+        }
+    }
+
+    return sample;
+}
 
 float** sample_matrix1(int row, int col, int sample_size, float** m) {
      float** sample = malloc(sizeof(float*) * sample_size);
@@ -215,8 +232,9 @@ int init_stim (int argc, long *args)
   if (_internal_stimulus) {
     free (_internal_stimulus);
   }
+
   float** mat = read_matrix(55529, 97, "word_embeddings.csv");
-  float** word_batch = sample_matrix1(55529, 97, args[0], mat);
+  float** word_batch = sample_matrix(55529, 97, args[0], mat);
   float** Phi = read_matrix(97, args[1], "codebook.csv");
   _internal_stimulus = multiply(args[0], 97, args[1], word_batch, Phi); 
   //_internal_stimulus = read_matrix(args[0], args[1], "stimulus_row2.csv");
@@ -224,20 +242,24 @@ int init_stim (int argc, long *args)
   return 0;
 }
 
-int get_stim (int argc, long *args)
+struct expr_res get_stim (int argc, struct expr_res *args)
 {
+  struct expr_res ret;
   float f;
   int tmp;
 
-  if (argc != 2) {
-    printf ("Error: get_stim needs two arguments\n");
-    return 0;
+  ret.width = FIX_POINT_A + FIX_POINT_B;
+
+  if (argc != 3) {
+    printf ("Error: get_stim needs three arguments\n");
+    return ret;
   }
-  // args[0] = x coordinate
-  // args[1] = y coordinate
+  // args[0] = ith row in the batch_size
+  // args[1] = x coordinate
+  // args[2] = y coordinate
 
   // f should be set to the stim for neuron at (x,y)
-  // where x = args[0], y = args[1]
+  // where x = args[1], y = args[2]
  
   //printf("neuron_shape = %d ", shape);
 
@@ -246,10 +268,10 @@ int get_stim (int argc, long *args)
   // float** Phi = read_matrix(97, args[3], "codebook.csv");
   // float** stimulus = multiply(args[2], 97, args[3], word_batch, Phi); 
 
-  int l = args[0] * _shape  + args[1];
-  //printf ("x = %ld, and y = %ld; \n", args[0], args[1]);
-  f = _internal_stimulus[0][l];  // For simplicity, I choose the first row of the stimuli matrix.
-  //printf ("stimulus[0][%d] = %f\n", l, f);
+  int l = args[1].v * _shape  + args[2].v;
+  //printf ("x = %ld, and y = %ld; \n", args[0].v, args[1].v);
+  f = _internal_stimulus[args[0].v][l];  
+  //printf ("stimulus[%ld][%d] = %f\n", args[0].v, l, f);
 
   if (f >= 0) {
      tmp = (int) (f * (1 << FIX_POINT_B) + 0.5);
@@ -258,7 +280,8 @@ int get_stim (int argc, long *args)
      tmp = (int) ((-f) * (1 << FIX_POINT_B) + 0.5);
      tmp = (1 << (FIX_POINT_A + FIX_POINT_B)) - tmp;
   }
-  return tmp;
+  ret.v = tmp;
+  return ret;
 }
 
 // int main(){

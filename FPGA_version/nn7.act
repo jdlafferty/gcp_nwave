@@ -26,12 +26,12 @@ open math;
 //      e    e    e    e
 //
 
-pint A = 8, B = 17;
+pint A = 7, B = 17;
 pint TOT = A + B;
 pint leaky = 35 * 131072;   // 35*2^17; 
 pint threshold = 1311;  // How to express 0.01 in fixed point way? (threshold = 0.01 * (2**B))
 pint lr_act = 1311;   // How to express 0.01 in fixed point way? (lr_act = 0.01 * (2**B))
-pint batch_size = 1;
+pint batch_size = 5;
 
 pint f = 16373; // This is the value of the softmax function.
 pint test_variable = 16381;
@@ -155,7 +155,8 @@ function get_inh_weight (pint idx) : pint;
 function init_stim (pint x, y) : pint;
 
 // returns stimulus for (x,y)
-function get_stim (pint batch_size ,shape) : pint;
+//function get_stim (pint idx , x, y) : pint;
+function get_stim (int idx, x, y) : int<TOT>;
 
 function within_radius(pint x, y, R) : pbool
 {
@@ -326,57 +327,57 @@ defproc grid()
     int test_result3;
 
   chp-txt {
-    idx := 0;
 
     //threshold_result := softmax<A, B>(f, threshold);
     //log("threshold_result = ", threshold_result, ";");  // I output the result of softmax function here.
 
-    test_result := fxp::mults<A,B>(leaky, test_variable);   // leaky = 35*1024; test_variable = 16381;
-    log("leaky * test_variable = ", test_result);   // 16375
+    //test_result := fxp::mults<A,B>(leaky, test_variable);   // leaky = 35*1024; test_variable = 16381;
+    //log("leaky * test_variable = ", test_result);   // 16375
 
-    test_result2 := fxp::add<A,B>(test_variable, test_variable2);   // test_variable2 = 16382;
-    log("test_variable + test_variable2 = ", test_result2);   // 16379
+    //test_result2 := fxp::add<A,B>(test_variable, test_variable2);   // test_variable2 = 16382;
+    //log("test_variable + test_variable2 = ", test_result2);   // 16379
 
-    test_result3 := fxp::sub<A,B>(test_variable, test_variable2);   // 
-    log("test_variable - test_variable2 = ", test_result3);   // 16383
+    //test_result3 := fxp::sub<A,B>(test_variable, test_variable2);   // 
+    //log("test_variable - test_variable2 = ", test_result3);   // 16383
 
 
-      log("Le = ", Le);
-      log("Li = ", Li);
+      //log("Le = ", Le);
+      //log("Li = ", Li);
 
-      log("WeightE[", 0, "]=", wE[0]);
-      log("WeightE[", 1, "]=", wE[1]);
-      log("WeightE[", 2, "]=", wE[2]);
-      log("WeightE[", 3, "]=", wE[3]);
-      log("WeightE[", 4, "]=", wE[4]);
-      log("WeightE[", 5, "]=", wE[5]);
-      log("WeightE[", 6, "]=", wE[6]);
-      log("WeightE[", 7, "]=", wE[7]);
-      log("WeightE[", 8, "]=", wE[8]);
-      log("WeightE[", 9, "]=", wE[9]);
-      log("WeightE[", 10, "]=", wE[10]);
-      log("WeightE[", 11, "]=", wE[11]);
-      log("WeightE[", 12, "]=", wE[12]);
-      log("WeightE[", 13, "]=", wE[13]);
-      log("WeightE[", 14, "]=", wE[14]);
-      log("WeightE[", 15, "]=", wE[15]);
-      log("WeightE[", 16, "]=", wE[16]);
-      log("WeightE[", 17, "]=", wE[17]);
-      log("WeightE[", 18, "]=", wE[18]);
-      log("WeightE[", 19, "]=", wE[19]);
-      log("WeightE[", 20, "]=", wE[20]);
-      log("WeightE[", 21, "]=", wE[21]);
-      log("WeightE[", 22, "]=", wE[22]);
-      log("WeightE[", 23, "]=", wE[23]);
-      log("WeightE[", 24, "]=", wE[24]);
-      log("WeightE[", 25, "]=", wE[25]);
-      log("WeightE[", 26, "]=", wE[26]);
-      log("WeightE[", 27, "]=", wE[27]);
+      //log("WeightE[", 0, "]=", wE[0]);
+      //log("WeightE[", 1, "]=", wE[1]);
+      //log("WeightE[", 2, "]=", wE[2]);
+      //log("WeightE[", 3, "]=", wE[3]);
+      //log("WeightE[", 4, "]=", wE[4]);
+      //log("WeightE[", 5, "]=", wE[5]);
+      //log("WeightE[", 6, "]=", wE[6]);
+      //log("WeightE[", 7, "]=", wE[7]);
+      //log("WeightE[", 8, "]=", wE[8]);
+      //log("WeightE[", 9, "]=", wE[9]);
+      //log("WeightE[", 10, "]=", wE[10]);
+      //log("WeightE[", 11, "]=", wE[11]);
+      //log("WeightE[", 12, "]=", wE[12]);
+      //log("WeightE[", 13, "]=", wE[13]);
+      //log("WeightE[", 14, "]=", wE[14]);
+      //log("WeightE[", 15, "]=", wE[15]);
+      //log("WeightE[", 16, "]=", wE[16]);
+      //log("WeightE[", 17, "]=", wE[17]);
+      //log("WeightE[", 18, "]=", wE[18]);
+      //log("WeightE[", 19, "]=", wE[19]);
+      //log("WeightE[", 20, "]=", wE[20]);
+      //log("WeightE[", 21, "]=", wE[21]);
+      //log("WeightE[", 22, "]=", wE[22]);
+      //log("WeightE[", 23, "]=", wE[23]);
+      //log("WeightE[", 24, "]=", wE[24]);
+      //log("WeightE[", 25, "]=", wE[25]);
+      //log("WeightE[", 26, "]=", wE[26]);
+      //log("WeightE[", 27, "]=", wE[27]);
 
-    while (idx < 1) {
      v := init_stim (batch_size, N*N);
+     idx := 0;
+    while (idx < batch_size) {
     (,i: N :
-     (,j: N : a[i][j].init!get_stim (i,j)   // 1 -> batch_size; 1600 -> N * N.
+     (,j: N : a[i][j].init!get_stim (idx, i, j)   //  batch_size; 1600 -> N * N.
       )
      );
 
@@ -386,7 +387,7 @@ defproc grid()
     log ("--- iteration: ", idx, " ---");
 
     (; i : N:
-     (; j : N: a[i][j].final?v; log("val @ ", i, ",", j, " := ", v)
+     (; j : N: a[i][j].final?v; log(idx, "-th row, val @ ", i, ",", j, " := ", v)
       )
     );
 
