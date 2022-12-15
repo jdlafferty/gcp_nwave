@@ -92,6 +92,6 @@ Under FPGA_version/ directory, run the following commands:
 
 1. `./compile.sh`
 
-2. `actsim -cnf=x.conf -Wlang_subst:off nn4.act 'grid<40,3,5>'`
+2. `actsim -cnf=x.conf -Wlang_subst:off nn7.act 'grid<40,3,5>'`
 
    
