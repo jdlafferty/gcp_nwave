@@ -17,13 +17,7 @@
   <component name="ChangeListManager">
     <list default="true" id="a3c02b02-a201-4566-90fd-375d56782c69" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/../.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../FPGA_version/.actsim_history" beforeDir="false" afterPath="$PROJECT_DIR$/../FPGA_version/.actsim_history" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../FPGA_version/support.o" beforeDir="false" afterPath="$PROJECT_DIR$/../FPGA_version/support.o" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/../FPGA_version/support.so" beforeDir="false" afterPath="$PROJECT_DIR$/../FPGA_version/support.so" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/a.out" beforeDir="false" afterPath="$PROJECT_DIR$/a.out" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/compute_act_msg_passing.c" beforeDir="false" afterPath="$PROJECT_DIR$/compute_act_msg_passing.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_msg_passing.c" beforeDir="false" afterPath="$PROJECT_DIR$/train_msg_passing.c" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -109,7 +103,7 @@
       <workItem from="1666279301472" duration="761000" />
       <workItem from="1667330701897" duration="5579000" />
       <workItem from="1667340375054" duration="3921000" />
-      <workItem from="1667935837838" duration="49353000" />
+      <workItem from="1667935837838" duration="50691000" />
     </task>
     <servers />
   </component>

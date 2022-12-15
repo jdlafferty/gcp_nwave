@@ -1,6 +1,6 @@
 ## Introduction
 
-The repo contains Cupy, C and CHP implementation of the Nwave Dynamics Model. 
+The repo contains Cupy, C and CHP implementation of the Nwave Dynamics Model. We wrote notes about our research, please see: https://drive.google.com/file/d/16BQkJAv_0oqrUk0mwHLh7jCzGl8-j1bD/view?usp=sharing.
 
 Cupy implementation aims to code the model in GPU environment. Our experiment is on GCP (Google Cloud Platform).
 

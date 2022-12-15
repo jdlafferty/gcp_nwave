@@ -3,16 +3,7 @@
   <component name="ChangeListManager">
     <list default="true" id="f9c5ab65-424d-461e-91c0-7ef693f7c1d9" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FPGA_version/.actsim_history" beforeDir="false" afterPath="$PROJECT_DIR$/FPGA_version/.actsim_history" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FPGA_version/nn4.act" beforeDir="false" afterPath="$PROJECT_DIR$/FPGA_version/nn4.act" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FPGA_version/support.c" beforeDir="false" afterPath="$PROJECT_DIR$/FPGA_version/support.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FPGA_version/support.o" beforeDir="false" afterPath="$PROJECT_DIR$/FPGA_version/support.o" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/FPGA_version/support.so" beforeDir="false" afterPath="$PROJECT_DIR$/FPGA_version/support.so" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/c_version/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/c_version/a.out" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/a.out" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/c_version/compute_act_msg_passing.c" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/compute_act_msg_passing.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/c_version/train_msg_passing.c" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/train_msg_passing.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_convolve.py" beforeDir="false" afterPath="$PROJECT_DIR$/train_convolve.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
