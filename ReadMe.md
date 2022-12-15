@@ -33,12 +33,11 @@ CHP implementation is our ultimate goal. The CHP language is created by Prof. Ra
 - FPGA_version/ : convert the program to FPGA environment
 
     For ACT language, refer to https://avlsi.csl.yale.edu/act/doku.php?id=language:start.
-    - nn4.act: CHP code of neuron activation process, using message-passing algorithm to better fit the parallelization
-    - support.c: Since CHP doesn't have exponential function, we define the weights in support.c, and call the function in nn4.act. Moroever, we writie a fucntion to read in the .csv file in support.c, and call the function in nn4.act
+    - nn7.act: CHP code of neuron activation process, using message-passing algorithm to better fit the parallelization
+    - support.c: Since CHP doesn't have exponential function, we define the weights in support.c, and call the function in nn7.act. Moroever, we writie a function to read in the .csv file in support.c, and call the function in nn7.act
     - x.conf: configuration file
-    - compile.sh: compile support.c in order to make it compatible to nn4.act file
-    - Run_actsim_nn4.sh: Command line used to run the nn4.act file
-
+    - compile.sh: compile support.c in order to make it compatible to nn7.act file
+    
 - variables_record/ : record and analyze all the values during the computation
     - record_variable_values.py: record all the values. Index are from random sampling the batch; value are from the computations
     - analyze_variable_values.py: analyze and make histogram plots
@@ -50,12 +49,19 @@ CHP implementation is our ultimate goal. The CHP language is created by Prof. Ra
 - configs.py : read all the hyperparameters
 
 - compute_whole_activ.py: compute whole "activity.npy", which contains the activations of over 50,000 words
+
 - compute_act_convolve.py: Don't compute whole activity file. Given some words, plot corresponding activations using spicy.convolve
+
 - compute_act_laplacian.py: Don't compute whole activity file. Given some words, plot corresponding activations using multiplication of laplacian matrix and activations
+
 - compute_act_msg_passing.py: Don't compute whole activity file. Given some words, compute and plot activations using message passing algorithm
+
 - matrix.py: implement vector multiplication and matrix multiplication in pure python
+
 - train_convolve.py: standalone python file of training process, and using convolution
+
 - train_laplacian.py: standalone python file of training process, and using laplacian matrix
+
 - train_msg_passing.py: standalone python file of training process, and using message passing algorithm
 
 # start 
