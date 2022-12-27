@@ -28,14 +28,12 @@ open math;
 
 pint A = 7, B = 17;
 pint TOT = A + B;
-pint leaky = 35 * 131072;   // 35*2^17; 
-pint threshold = 1311;  // How to express 0.01 in fixed point way? (threshold = 0.01 * (2**B))
-pint lr_act = 1311;   // How to express 0.01 in fixed point way? (lr_act = 0.01 * (2**B))
-pint batch_size = 5;
 
-pint f = 16373; // This is the value of the softmax function.
-pint test_variable = 16381;
-pint test_variable2 = 16382;
+pint leaky = fxp::conv_to_fxp (A,B, 35.0);
+pint threshold = fxp::conv_to_fxp(A,B, 0.01);
+pint lr_act = fxp::conv_to_fxp (A,B, 0.01);
+
+pint batch_size = 5;
 
 template<pint A,B>
 function softmax(int<A+B> val, threshold) : int<A+B>
