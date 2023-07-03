@@ -70,7 +70,7 @@ int get_index_from_position(int xi, int yi, int xj, int yj, int r){
     }
 }
 
-int ** compute_indexset(r, num_nbs, neuron_shape){
+int ** compute_indexset(int r, int num_nbs, int neuron_shape){
     int side_length = sqrt(neuron_shape);
     int** set = malloc(sizeof(int*) * neuron_shape);
     for (int i = 0; i < neuron_shape; i++) {
@@ -98,7 +98,7 @@ int ** compute_indexset(r, num_nbs, neuron_shape){
     return set;
 }
 
-float* compute_W(num_nbs, r, w, sigmaE){
+float* compute_W(int num_nbs, int r, int w, int sigmaE){
     float* W = malloc(sizeof(float) * num_nbs);
     int count = 0;
     for (int i = 0; i < (2*r+1)*(2*r+1); i++){
