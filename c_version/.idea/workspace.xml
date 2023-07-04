@@ -15,7 +15,14 @@
     </configurations>
   </component>
   <component name="ChangeListManager">
-    <list default="true" id="a3c02b02-a201-4566-90fd-375d56782c69" name="Changes" comment="" />
+    <list default="true" id="a3c02b02-a201-4566-90fd-375d56782c69" name="Changes" comment="">
+      <change beforePath="$PROJECT_DIR$/../.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/../.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../FPGA_version/.actsim_history" beforeDir="false" afterPath="$PROJECT_DIR$/../FPGA_version/.actsim_history" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../FPGA_version/support.c" beforeDir="false" afterPath="$PROJECT_DIR$/../FPGA_version/support.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/train_msg_passing.c" beforeDir="false" afterPath="$PROJECT_DIR$/train_msg_passing.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../train_convolve.py" beforeDir="false" afterPath="$PROJECT_DIR$/../train_convolve.py" afterDir="false" />
+    </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
     <option name="HIGHLIGHT_NON_ACTIVE_CHANGELIST" value="false" />
@@ -58,17 +65,17 @@
   }
 }</component>
   <component name="RunManager" selected="CMake Application.Unnamed (1)">
+    <configuration default="true" type="CLionExternalRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
+      <method v="2">
+        <option name="CLION.EXTERNAL.BUILD" enabled="true" />
+      </method>
+    </configuration>
     <configuration name="Unnamed (1)" type="CMakeRunConfiguration" factoryName="Application" nameIsGenerated="true" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true" EXPLICIT_BUILD_TARGET_NAME="all">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
     </configuration>
     <configuration name="Unnamed" type="CMakeRunConfiguration" factoryName="Application" nameIsGenerated="true" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
-      <method v="2">
-        <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
-      </method>
-    </configuration>
-    <configuration default="true" type="CMakeRunConfiguration" factoryName="Application" REDIRECT_INPUT="false" ELEVATE="false" USE_EXTERNAL_CONSOLE="false" PASS_PARENT_ENVS_2="true">
       <method v="2">
         <option name="com.jetbrains.cidr.execution.CidrBuildBeforeRunTaskProvider$BuildBeforeRunTask" enabled="true" />
       </method>
@@ -100,7 +107,8 @@
       <workItem from="1666279301472" duration="761000" />
       <workItem from="1667330701897" duration="5579000" />
       <workItem from="1667340375054" duration="3921000" />
-      <workItem from="1667935837838" duration="50691000" />
+      <workItem from="1667935837838" duration="55035000" />
+      <workItem from="1678364745563" duration="4105000" />
     </task>
     <servers />
   </component>

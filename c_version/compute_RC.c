@@ -98,7 +98,7 @@ int ** compute_indexset(int r, int num_nbs, int neuron_shape){
     return set;
 }
 
-float* compute_W(int num_nbs, int r, int w, int sigmaE){
+float* compute_WE(int num_nbs, int r, int we, int sigmaE){
     float* W = malloc(sizeof(float) * num_nbs);
     int count = 0;
     for (int i = 0; i < (2*r+1)*(2*r+1); i++){
@@ -113,11 +113,33 @@ float* compute_W(int num_nbs, int r, int w, int sigmaE){
 
     float W_E_sum = sum(num_nbs, W);
     for (int i = 0; i < num_nbs; i++){
-        W[i] = w * W[i] / W_E_sum;
+        W[i] = we * W[i] / W_E_sum;
     }
 
     return W;
 }
+
+float* compute_WI(int num_nbs, int r, int wi){
+    float* W = malloc(sizeof(float) * num_nbs);
+    int count = 0;
+    for (int i = 0; i < (2*r+1)*(2*r+1); i++){
+        int xi = i / (2*r + 1);
+        int yi = i % (2*r + 1);
+        int distsq = (xi - r)* (xi - r) + (yi - r)* (yi - r);
+        if (distsq <= r*r){
+            W[count] = 1;
+            count += 1;
+        }
+    }
+
+    float W_E_sum = sum(num_nbs, W);
+    for (int i = 0; i < num_nbs; i++){
+        W[i] = wi * W[i] / W_E_sum;
+    }
+
+    return W;
+}
+
 
 float** exc_act_update(float** exc_act_dummy, float** inh_act_dummy, int bs, int neuron_shape, int leaky,
                        int num_E_nbs, int num_I_nbs, float* W_E, float* W_I, int** N_E, int** N_I){
@@ -382,42 +404,6 @@ float l2_loss(int r, int c, float** w){
     return sqrtloss;
 }
 
-float** update_Phi(float** word_batch, float** exc_act, int bs, int imbed_dim, int neuron_shape, float lr_Phi, float** Phi, float l2_error){
-    float** Phi_T = transpose(imbed_dim, neuron_shape, Phi);
-
-    float** fitted_value = multiply(bs, neuron_shape, imbed_dim, exc_act, Phi_T);
-    free_matrix(neuron_shape, Phi_T);
-
-    float** error = matrix_minus(bs, imbed_dim, word_batch, fitted_value);
-    l2_error = l2_loss(bs, imbed_dim, error);
-    free_matrix(bs, fitted_value);
-
-    float** error_T = transpose(bs, imbed_dim, error);
-    free_matrix(bs, error);
-
-    float** gradient = multiply(imbed_dim, bs, neuron_shape, error_T, exc_act);
-    free_matrix(imbed_dim, error_T);
-
-    normalize(imbed_dim, neuron_shape, gradient);
-
-    scalar_matrix(imbed_dim, neuron_shape, lr_Phi, gradient);
-
-    float** Phi_new = matrix_sum(imbed_dim, neuron_shape, Phi, gradient);
-    free_matrix(imbed_dim, gradient);
-    //free_matrix(imbed_dim, Phi);
-    Phi = Phi_new;
-
-    float* normalize = Phi_normalize(imbed_dim, neuron_shape, Phi);
-
-    for (int j = 0; j < neuron_shape; j++){
-        for (int i = 0; i < imbed_dim; i++){
-            Phi[i][j] = Phi[i][j] / normalize[j];
-        }
-    }
-
-    free(normalize);
-    return Phi;
-}
 
 float std(int l, float* W){
     float mean = sum(l, W) / l;
@@ -451,8 +437,8 @@ int main() {
     int** N_E = compute_indexset(re, num_E_nbs, neuron_shape);
     int** N_I = compute_indexset(ri, num_I_nbs, neuron_shape);
 
-    float* W_E = compute_W(num_E_nbs, re, we, sigmaE);
-    float* W_I = compute_W(num_I_nbs, ri, wi, sigmaE);
+    float* W_E = compute_WE(num_E_nbs, re, we, sigmaE);
+    float* W_I = compute_WI(num_I_nbs, ri, wi);
 
     float** codebook = read_matrix(imbed_dim, neuron_shape, "Phi.csv");
 

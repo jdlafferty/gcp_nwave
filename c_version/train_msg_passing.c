@@ -442,8 +442,10 @@ int main(int argc, char **argv) {
             }
         }
 
+        // Normalize Gradient
         normalize(imbed_dim, neuron_shape, gradient);
 
+        // Scale Gradient
         scalar_matrix(imbed_dim, neuron_shape, lr_Phi, gradient);
 
         // Phi += gradient
