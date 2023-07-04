@@ -3,14 +3,9 @@
   <component name="ChangeListManager">
     <list default="true" id="f9c5ab65-424d-461e-91c0-7ef693f7c1d9" name="Changes" comment="">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/c_version/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/.idea/workspace.xml" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/c_version/RC.csv" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/RC.csv" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/c_version/a.out" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/a.out" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/c_version/cmake-build-debug/CMakeFiles/clion-log.txt" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/c_version/compute_RC.c" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/compute_RC.c" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/FPGA_version/support" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/c_version/RC.pdf" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/RC.pdf" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/c_version/plot_RC.ipynb" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/plot_RC.ipynb" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/c_version/train_msg_passing.c" beforeDir="false" afterPath="$PROJECT_DIR$/c_version/train_msg_passing.c" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/train_convolve.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -45,7 +40,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "com.google.cloudcode.ide_session_index": "20230704_0001",
+    "com.google.cloudcode.ide_session_index": "20230704_0002",
     "last_opened_file_path": "/Users/apple/ShanghaiTech/Yale/2022 summer research/project 1/nwave_gcp/gcp_nwave",
     "nodejs_package_manager_path": "npm"
   }
@@ -198,7 +193,7 @@
       <workItem from="1669210258258" duration="5133000" />
       <workItem from="1673134948785" duration="5893000" />
       <workItem from="1680795881869" duration="61000" />
-      <workItem from="1688456498761" duration="4144000" />
+      <workItem from="1688456498761" duration="4866000" />
     </task>
     <servers />
   </component>

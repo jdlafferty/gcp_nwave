@@ -1,0 +1,370 @@
+/*
+ *
+ *
+ *  Example with nearest-neighbor communication
+ *
+ *
+ */
+import math::fxp;
+
+open math;
+
+//
+//  x = gridpoint
+//  e = edge_in, edge_out
+//
+//      e    e    e    e
+//      |    |    |    |
+// e -- x -- x -- x -- x -- e
+//      |    |    |    |
+// e -- x -- x -- x -- x -- e
+//      |    |    |    |
+// e -- x -- x -- x -- x -- e
+//      |    |    |    |
+// e -- x -- x -- x -- x -- e
+//      |    |    |    |
+//      e    e    e    e
+//
+
+pint A = 7, B = 17;
+pint TOT = A + B;
+
+pint leaky = fxp::conv_to_fxp (A,B, 35.0);
+pint threshold = fxp::conv_to_fxp(A,B, 0.01);
+pint lr_act = fxp::conv_to_fxp (A,B, 0.01);
+
+pint batch_size = 5;
+pint num_features = 97;
+
+template<pint A,B>
+function softmax(int<A+B> val, threshold) : int<A+B>
+{
+   // assume that threshold is always > 0
+  chp-txt {
+    select {
+    case fxp::le<A,B>(threshold,val) & fxp::positive<A,B>(val):
+     self := fxp::sub<A,B>(val,threshold);
+    case fxp::le<A,B>(threshold,fxp::uminus<A,B>(val)) & fxp::negative<A,B>(val):
+     self := fxp::add<A,B>(val,threshold);
+    else:
+     self := 0
+    }
+  }}
+
+template<pint L_e; pint wE[L_e];  // excitatory weights
+         pint L_i; pint wI[L_i]   // inhibitory weights
+	>
+defproc gridpoint (chan?(int<TOT>) init[batch_size][num_features]; chan!(int<TOT>) final;
+		   chan?(int<TOT>) inE[L_e]; chan!(int<TOT>) outE[L_e];
+		   chan?(int<TOT>) inI[L_i]; chan!(int<TOT>) outI[L_i]
+		   )
+{
+  int<TOT> x_exc, x_inh, stim, delta_x_exc, delta_x_inh; // local value
+  int i, j;
+
+  int<TOT> dinE[L_e], dinI[L_i];
+
+  int<TOT> WB[batch_size][num_features];   // WB: 256 * 97;
+  int<TOT> phi[num_features];      // phi: 97*1 (for one grid);
+
+  // hardware description
+  chp-txt {
+    // random initialization for phi
+   
+    forever {
+      // x = local value, need excitatory and inhibitory
+
+      // loop where we read in the WB matrix
+      while (j < batch_size) {
+
+         i := 0;
+         stim := 0;
+	 while (i < num_features) {
+	   init[j][i]?WB[j][i];
+	   stim := stim + WB[j][i]*phi[i];
+	   i := i + 1;
+	 };
+
+      // run loop 50 times
+
+      x_exc := 0;
+      x_inh := 0;
+      delta_x_exc := 0;
+      delta_x_inh := 0;
+	 
+      i := 0;
+      while (i < 30) {
+
+	  (, j : L_e : inE[j]?dinE[j] ), (, j : L_e : outE[j]!x_exc ),
+          (, j : L_i : inI[j]?dinI[j] ), (, j : L_i : outI[j]!x_inh );
+	    
+	// I have sent my local value out, and received values from my four neighbors
+	
+	// local update rule
+
+        //log("iter = ", i, "; x_exc = ", x_exc);
+        delta_x_exc := fxp::mults<A,B>(leaky, x_exc);
+        //log("iter = ", i, "; leaky_delta_x_exc = ", delta_x_exc);
+        delta_x_exc := fxp::uminus<A,B>(delta_x_exc);
+        //log("iter = ", i, "; -leaky_delta_x_exc = ", delta_x_exc);
+        (; j : L_e : delta_x_exc := fxp::add<A,B>(delta_x_exc, fxp::mults<A,B>(wE[j],dinE[j])) );
+        (; j : L_i : delta_x_exc := fxp::sub<A,B>(delta_x_exc, fxp::mults<A,B>(wI[j],dinI[j])) );
+
+        //log("iter = ", i, "; delta_x_exc = ", delta_x_exc);
+
+        delta_x_exc :=  fxp::add<A,B>(delta_x_exc, stim);
+
+        //log("iter = ", i, "; delta_x_exc1 = ", delta_x_exc); 
+
+        delta_x_exc :=  fxp::mults<A, B>(lr_act, delta_x_exc);
+
+        //log("iter = ", i, "; delta_x_exc2 = ", delta_x_exc); 
+
+        x_exc := fxp::add<A,B>(delta_x_exc, x_exc); 
+        x_exc := softmax<A, B>(x_exc, threshold);
+
+        //log("iter = ", i, "; x_exc = ", x_exc); 
+        
+        delta_x_inh := fxp::mults<A,B>(leaky, x_inh);
+        delta_x_inh := fxp::uminus<A,B>(delta_x_inh);
+        (; j : L_e : delta_x_inh := fxp::add<A,B>(delta_x_inh, fxp::mults<A,B>(wE[j],dinE[j])) );
+        delta_x_inh := fxp::mults<A,B>(delta_x_inh, lr_act); 
+        x_inh := fxp::add<A,B>(delta_x_inh, x_inh); 
+        x_inh := softmax<A, B>(x_inh, threshold);
+
+        // log("iter = ", i, "; x_exc = ", x_exc, "; x_inh = ", x_inh);
+      
+        i := i + 1
+      };
+
+        final!x_exc
+	j := j + 1;
+      }
+    }
+  }
+}
+
+defproc edge_in(chan?(int<TOT>) in)
+{
+  int v;
+  chp-txt {
+     forever {
+        in?v
+     }
+  }
+}
+
+defproc edge_out(chan!(int<TOT>) out)
+{
+  chp-txt {
+    forever {
+      out!0
+    }
+  }
+}
+
+function set_num_weights (pint x) : pbool;
+function set_weight (pint i, dx, dy; pbool is_excite) : pbool;
+function get_exc_weight (pint idx) : pint;
+function get_inh_weight (pint idx) : pint;
+function init_stim (pint x, y) : pint;
+
+// returns stimulus for (x,y)
+
+function get_stim (int idx, x, y) : int<TOT>;
+
+function within_radius(pint x, y, R) : pbool
+{
+  chp {
+    log ("compute within: ", x, ",", y, "  ", R);
+    [ x*x + y*y <= R*R -> self := true
+   [] else -> self := false
+    ]
+  }
+}
+
+function in_grid(pint i, j, N) : pbool
+{
+  chp {
+    [ i < 0 -> self := false
+   [] i >= N -> self := false
+   [] j < 0 -> self := false
+   [] j >= N -> self := false
+   [] else -> self := true
+    ]
+  }
+}
+
+template<pint N, Re, Ri>
+defproc grid()
+{
+  // compute dx, dy for neighbors
+  pint Le = 0;
+  (i : -Re .. Re :
+    (j : -Re .. Re :
+	[ (i != 0 | j != 0) & within_radius(i,j,Re) -> 
+           pint dxE[Le..Le];
+           pint dyE[Le..Le];
+           pint wE[Le..Le];
+           dxE[Le] = i;
+           dyE[Le] = j;
+           wE[Le] = 1;
+           Le = Le + 1;
+        ]
+     )
+  )
+
+  // compute excitatory weights
+  pbool tmp;
+  tmp = set_num_weights(Le);
+  (i: Le : tmp = set_weight(i,dxE[i],dyE[i],true);)
+  (i: Le : wE[i] = get_exc_weight(i); 
+     ${ "WeightE[", i, "]=", wE[i] };
+  )
+    
+  pint Li = 0;
+  (i : -Ri .. Ri :
+    (j : -Ri .. Ri :
+	[ (i != 0 | j != 0) & within_radius(i,j,Ri) -> 
+           pint dxI[Li..Li];
+           pint dyI[Li..Li];
+           pint wI[Li..Li];
+           dxI[Li] = i;
+           dyI[Li] = j;
+           wI[Li] = 1;
+           Li = Li + 1;
+        ]
+     )
+  )
+
+  // compute inhibitory weights
+  tmp = set_num_weights(Li);
+  (i: Li : tmp = set_weight(i,dxI[i],dyI[i],false);)
+  (i: Li : wI[i] = get_inh_weight(i); 
+     ${ "WeightI[", i, "]=", wI[i] };
+  )
+
+  //
+  // create all the components
+  //
+  gridpoint<Le,wE,Li,wI> a[N][N];
+
+  // keep track of outputs that are
+  // used at each grid-point
+  pint ocount[N][N];
+  (i : N :
+    (j : N : 
+        ocount[i][j] = 0;
+    )
+  )
+
+  pint idx_out;
+
+  pint ei = 0, eo = 0;
+
+  // connect up the components in a grid pattern
+  (i : N :
+   (j : N :
+    (l : Le :  // iterate over neighbors
+      [ in_grid(i+dxE[l],j+dyE[l],N) -> 
+		idx_out = ocount[ i + dxE[l] ][ j + dyE[l] ];
+	        ocount[ i + dxE[l] ][ j + dyE[l] ] = idx_out + 1;
+		a[i][j].inE[l] = a[i+dxE[l]][j+dyE[l]].outE[idx_out];
+     [] ~in_grid(i+dxE[l],j+dyE[l],N) ->
+                edge_out EO[eo..eo];
+                a[i][j].inE[l] = EO[eo].out;
+                eo = eo + 1;
+      ]
+    )
+   )
+  )
+  // now connect unused outports to edge_in components
+  (i : N :
+   ( j : N :
+        (l : ocount[i][j] .. Le-1 : 
+              edge_in EI[ei..ei];
+              a[i][j].outE[l] = EI[ei].in;
+              ei = ei + 1;
+        )
+   )
+  )
+
+
+  /* 
+     Connect inhibitory neighbors.
+     
+     This is the same as the above code that wires up excitatory
+     neighbors, with Le -> Li, dxE -> dxI, dyE -> dyI, and the ports 
+     inE -> inI and outE -> outI
+  */
+  (i : N :
+    (j : N : 
+        ocount[i][j] = 0;
+    )
+  )
+  
+  (i : N :
+   (j : N :
+    (l : Li :  // iterate over neighbors
+      [ in_grid(i+dxI[l],j+dyI[l],N) -> 
+		idx_out = ocount[ i + dxI[l] ][ j + dyI[l] ];
+	        ocount[ i + dxI[l] ][ j + dyI[l] ] = idx_out + 1;
+		a[i][j].inI[l] = a[i+dxI[l]][j+dyI[l]].outI[idx_out];
+     [] ~in_grid(i+dxI[l],j+dyI[l],N) ->
+                edge_out EO[eo..eo];
+                a[i][j].inI[l] = EO[eo].out;
+                eo = eo + 1;
+      ]
+    )
+   )
+  )
+  // now connect unused outports to edge_in components
+  (i : N :
+   ( j : N :
+        (l : ocount[i][j] .. Li-1 : 
+              edge_in EI[ei..ei];
+              a[i][j].outI[l] = EI[ei].in;
+              ei = ei + 1;
+        )
+   )
+  )
+
+    //
+    // ( op  i : N : stmt(i) )
+    //
+    // stmt(0) op stmt(1) op stmt(2) op ... op stmt(N-1)
+
+    int v, idx;
+
+    int threshold_result;
+    int test_result;
+    int test_result2;
+    int test_result3;
+
+  chp-txt {
+
+     v := init_stim (batch_size, N*N);
+     idx := 0;
+    while (idx < batch_size) {    //  batch_size; 1600 -> N * N.
+    (,i: N :
+     (,j: N : 
+     (k: num_features:
+        a[i][j].init[idx][k]!get_stim (idx, k)
+     )
+      )
+     );
+
+    //  a[0][0].init!0, a[0][1].init!1, a[0][2].init!2, a[0][3].init!3,
+    //  a[1][0].init!1, a[1][1].init!2, a[1][2].init!3, etc.
+
+    log ("--- iteration: ", idx, " ---");
+
+    (; i : N:
+     (; j : N: a[i][j].final?v; log(idx, "-th row, val @ ", i, ",", j, " := ", v)
+      )
+    );
+
+    idx := idx + 1
+   }
+  }
+}
