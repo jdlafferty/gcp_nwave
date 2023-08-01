@@ -444,9 +444,7 @@ int main() {
 
     float** batch = malloc_matrix(imbed_dim, imbed_dim);
     for (int i = 0; i < imbed_dim; i++){
-        for (int j  = 0; j < imbed_dim; j++){
-            batch[i][i] = 1.0;
-        }
+        batch[i][i] = 1.0;
     }
 
     for (int i = 0; i < imbed_dim; i++){
