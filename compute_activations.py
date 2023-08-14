@@ -2,13 +2,14 @@ from csv import DictReader
 import os
 import matplotlib.pyplot as plt
 from matplotlib.patches import Rectangle
+from mpl_toolkits.axes_grid1.axes_divider import make_axes_locatable
 import numpy
 import math
 import argparse
 import pickle
 
-re = 5
-ri = 3
+re = 3
+ri = 5
 wi = 5
 we = 30
 lr_act = 0.01
@@ -46,7 +47,7 @@ cnt = 0
 word_embeddings = numpy.load('./' + 'data/googleNgram/embed100.npy')
 word_embeddings = numpy.delete(word_embeddings, [55, 58, 84], axis = 1)
 word_embeddings = cp.asarray(word_embeddings)
-num_test_vocabs = numpy.asarray(20000)
+num_test_vocabs = numpy.asarray(55529)
 SUBSAMPLE_SIZE = numpy.asarray(4096)
 
 def load_test_batch(words):
@@ -85,11 +86,8 @@ def perceive_to_get_stimulus(word_batch, codebook):
 def stimulate(stimulus):  # stimulus: (256, 20, 20)
     global exc_act
     global inh_act
-    print(stimulus.shape)
     for t in range(int(max_act_fit)):
         exc_act_tm1 = cp.copy(exc_act)
-        print(exc_act.shape)
-        print(exck.shape)
         exc_input = convolve(exc_act, exck, mode="same")  # (256, 20, 20)
         inh_input = convolve(inh_act, inhk, mode="same")
 
@@ -116,20 +114,16 @@ def plot_word_activations(words, filename=''):
     global bs
     bs = len(words)
     global exc_act
-    global exc_act_dummy
     global inh_act
-    global inh_act_dummy
-    exc_act_dummy = cp.zeros(shape = (bs, neuron_shape[0]*neuron_shape[1] + 1))
-    exc_act = cp.zeros(shape=(bs, neuron_shape[0] * neuron_shape[1]))  # shape should be (bs, neuron_shape)!
-    inh_act_dummy = cp.zeros(shape = (bs, neuron_shape[0]*neuron_shape[1] + 1))
-    inh_act = cp.zeros(shape=(bs, neuron_shape[0]*neuron_shape[1]))
+    exc_act = cp.zeros(shape=(bs, neuron_shape[0], neuron_shape[1]))  # shape should be (bs, neuron_shape)!
+    inh_act = cp.zeros(shape=(bs, neuron_shape[0], neuron_shape[1]))
 
     global activity
     word_batch, wp_idx = load_test_batch(words)
     try:
         stimulus = perceive_to_get_stimulus(word_batch, Phi)
         activ = stimulate(stimulus)
-        #activ = activ.reshape([bs, num_units])
+        activ = activ.reshape([bs, num_units])
         activity[wp_idx, :] = activ
     except RuntimeError as e:
         print(e)
@@ -152,7 +146,7 @@ def plot_word_activations(words, filename=''):
             ax.set_title("{}".format(word), fontsize=24)
             ax.set_axis_off()
             if len(filename) > 0:
-                plt.savefig(fpath + '%s_%d.pdf' % (filename, i))
+                plt.savefig("./" + '%s_%d.pdf' % (filename, i))
                 i = i + 1
             #plt.show()
 
@@ -161,12 +155,37 @@ def plot_word_activations(words, filename=''):
 Phi = cp.load("./" + "codebook.npy")
 
 emb_dim, num_units = Phi.shape
+print('num_units:' + str(num_units))
 activity = cp.zeros(shape=(num_test_vocabs, num_units))
 
 with open('./' + 'data/googleNgram/4vocabidx.pkl', 'rb') as f:
     vocabidx = pickle.load(f)
 
+vocab = [w for w in vocabidx]
+
+print('vocabulary size: ' + str(len(vocab)))
 if __name__ == "__main__":
-    plot_word_activations(['brain'], 'test')
+    plot_word_activations(['apple', 'intel', 'ibm', 'banana'], 'fruit')
+    plot_word_activations(['king', 'queen', 'princess', 'monarch', 'woman'], 'monarchs')
+    words = ['pittsburgh', 'ohio', 'football', 'philadelphia', 'virginia', 'touchdown', 'falcons', 'pennsylvania']
+    plot_word_activations(words, 'pittsburgh')
+
+
+batch_size = 128
+global exc_act
+global inh_act
+exc_act = cp.zeros(shape=(batch_size, neuron_shape[0], neuron_shape[1]))  # shape should be (bs, neuron_shape)!
+inh_act = cp.zeros(shape=(batch_size, neuron_shape[0], neuron_shape[1]))
+
+print('Computing activations for random batches of %d words...' % batch_size)
+num_batches = 1000
+
+from tqdm import tqdm
+for i in tqdm(range(num_batches)):
+    inds = cp.random.choice(range(len(vocab)), size=batch_size)
+    words = [vocab[inds[i]] for i in range(batch_size)]
+    word_batch, wp_idx = load_test_batch(words)
+    stimulus = perceive_to_get_stimulus(word_batch, Phi)
+
 
 
