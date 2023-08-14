@@ -79,7 +79,7 @@ Login to gcloud using netid:
   `gcloud auth login`
 
 Set project:
-  `gcloud config set project jl2994-nerualnet-project-aa1f`
+  `gcloud config set project jl2994-neuralnet-project-aa1f`
 
 Start instance:
   `gcloud compute instances start --zone "us-east4-b" "rob-test"`
