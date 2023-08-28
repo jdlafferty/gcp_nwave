@@ -189,7 +189,7 @@ float** read_matrix(int row, int col, char* filename) {
     int i = 0, j;
 
     FILE* fp = fopen(filename, "r");
-    while((line = fgets(buffer, sizeof(buffer), fp)) != NULL) {
+    while(i < row && (line = fgets(buffer, sizeof(buffer), fp)) != NULL) {
         j = 0;
         record = strtok(line, ",");
         while(record != NULL && j < col) {
