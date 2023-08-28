@@ -192,12 +192,16 @@ float** read_matrix(int row, int col, char* filename) {
     while((line = fgets(buffer, sizeof(buffer), fp)) != NULL) {
         j = 0;
         record = strtok(line, ",");
-        while(record != NULL) {
+        while(record != NULL && j < col) {
             mat[i][j] = atof(record);
             record = strtok(NULL, ",");
             j++;
         }
         i++;
+        if (buffer[sizeof(buffer)-2] != '\n') {
+           /* skip to next line */
+           while (!feof (fp) && fgetc (fp) != '\n') { /* nothing */ }
+        }
     }
     fclose(fp);
 
