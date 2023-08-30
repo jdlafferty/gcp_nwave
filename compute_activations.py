@@ -24,12 +24,9 @@ def parse_argv():
     return parser.parse_args()
 
 args = parse_argv()
-print(args)
 
 def get_args_processor():
     return args.processor
-
-print(get_args_processor())
 
 if get_args_processor()=="CPU":
     import numpy as cp
@@ -178,14 +175,14 @@ with open('./' + 'data/googleNgram/4vocabidx.pkl', 'rb') as f:
 vocab = [w for w in vocabidx]
 
 print('vocabulary size: ' + str(len(vocab)))
-if __name__ == "__main__":
-    plot_word_activations(['apple', 'intel', 'ibm', 'banana'], 'fruit')
-    plot_word_activations(['king', 'queen', 'princess', 'monarch', 'woman'], 'monarchs')
-    words = ['pittsburgh', 'ohio', 'football', 'philadelphia', 'virginia', 'touchdown', 'falcons', 'pennsylvania']
-    plot_word_activations(words, 'pittsburgh')
+#if __name__ == "__main__":
+    #plot_word_activations(['apple', 'intel', 'ibm', 'banana'], 'fruit')
+    #plot_word_activations(['king', 'queen', 'princess', 'monarch', 'woman'], 'monarchs')
+    #words = ['pittsburgh', 'ohio', 'football', 'philadelphia', 'virginia', 'touchdown', 'falcons', 'pennsylvania']
+    #plot_word_activations(words, 'pittsburgh')
 
 
-batch_size = 128
+batch_size = 512
 global exc_act
 global inh_act
 exc_act = cp.zeros(shape=(batch_size, neuron_shape[0], neuron_shape[1]))  # shape should be (bs, neuron_shape)!
@@ -197,7 +194,7 @@ num_batches = 1000
 from tqdm import tqdm
 for i in tqdm(range(num_batches)):
     inds = cp.random.choice(range(len(vocab)), size=batch_size)
-    words = [vocab[inds[i]] for i in range(batch_size)]
+    words = [vocab[int(inds[i])] for i in range(batch_size)]
     word_batch, wp_idx = load_test_batch(words)
     stimulus = perceive_to_get_stimulus(word_batch, Phi)
 
