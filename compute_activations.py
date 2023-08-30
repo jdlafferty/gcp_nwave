@@ -18,13 +18,27 @@ leaky = wi + we
 input_dim = 97
 neuron_shape = (40, 40)
 
-CPU = 1
-if CPU:
+def parse_argv():
+    parser = argparse.ArgumentParser(prog='')
+    parser.add_argument("--processor", type = str)
+    return parser.parse_args()
+
+args = parse_argv()
+print(args)
+
+def get_args_processor():
+    return args.processor
+
+print(get_args_processor())
+
+if get_args_processor()=="CPU":
     import numpy as cp
     from scipy.signal import convolve
+    print("Using CPU")
 else:
     import cupy as cp
     from cusignal.convolution.convolve import convolve
+    print("Using GPU")
 
 def get_kernels(re, ri, wi=5, we=30, sigmaE = 3):
     k_exc = cp.zeros([2*re+1, 2*re+1])
