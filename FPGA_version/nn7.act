@@ -155,6 +155,7 @@ function init_stim (pint x, y) : pint;
 // returns stimulus for (x,y)
 //function get_stim (pint idx , x, y) : pint;
 function get_stim (int idx, x, y) : int<TOT>;
+function print_fixpoint (int<A+B> x) : int<1>;
 
 function within_radius(pint x, y, R) : pbool
 {
@@ -385,7 +386,9 @@ defproc grid()
     log ("--- iteration: ", idx, " ---");
 
     (; i : N:
-     (; j : N: a[i][j].final?v; log(idx, "-th row, val @ ", i, ",", j, " := ", v)
+     (; j : N: a[i][j].final?v; 
+               log(idx, "-th row, val @ ", i, ",", j, " := ", v);
+               v := print_fixpoint(v)
       )
     );
 

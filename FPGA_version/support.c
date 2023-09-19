@@ -291,6 +291,31 @@ struct expr_res get_stim (int argc, struct expr_res *args)
   return ret;
 }
 
+struct expr_res print_fixpoint (int argc, struct expr_res *argv)
+{
+  struct expr_res ret;
+  double f;
+  ret.v = 0;
+  ret.width = 1;
+  if (argc != 1) {
+    printf ("Error: print_fixpoint needs one argument\n");
+    return ret;
+  }
+  unsigned long a = argv[0].v;
+  int b;
+  if ((a >> (FIX_POINT_A + FIX_POINT_B - 1)) == 1) {
+    a = (1UL << (FIX_POINT_A + FIX_POINT_B)) - a;
+    b = -1;
+   }
+   else {
+    b = 1;
+   }
+   f = b*(((double)a)/(1 << FIX_POINT_B));
+   printf ("  >> %g\n", f);
+  ret.v = 1;
+  return ret;
+}
+
 // int main(){
 //   // long parameter[4];
 //   // parameter[0] = 2;
