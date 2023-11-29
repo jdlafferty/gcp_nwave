@@ -97,6 +97,7 @@ def perceive_to_get_stimulus(word_batch, codebook):
 def stimulate(stimulus):  # stimulus: (256, 20, 20)
     global exc_act
     global inh_act
+
     for t in range(int(max_act_fit)):
         exc_act_tm1 = cp.copy(exc_act)
         exc_input = convolve(exc_act, exck, mode="same")  # (256, 20, 20)
@@ -181,22 +182,32 @@ print('vocabulary size: ' + str(len(vocab)))
     #words = ['pittsburgh', 'ohio', 'football', 'philadelphia', 'virginia', 'touchdown', 'falcons', 'pennsylvania']
     #plot_word_activations(words, 'pittsburgh')
 
+def runit(processor="CPU"):
+    batch_size = 512
+    global exc_act
+    global inh_act
 
-batch_size = 512
-global exc_act
-global inh_act
-exc_act = cp.zeros(shape=(batch_size, neuron_shape[0], neuron_shape[1]))  # shape should be (bs, neuron_shape)!
-inh_act = cp.zeros(shape=(batch_size, neuron_shape[0], neuron_shape[1]))
+    exc_act = cp.zeros(shape=(batch_size, neuron_shape[0], neuron_shape[1]))  # shape should be (bs, neuron_shape)!
+    inh_act = cp.zeros(shape=(batch_size, neuron_shape[0], neuron_shape[1]))
 
-print('Computing activations for random batches of %d words...' % batch_size)
-num_batches = 1000
+    print('Computing activations for random batches of %d words...' % batch_size)
+    num_batches = 10
 
-from tqdm import tqdm
-for i in tqdm(range(num_batches)):
-    inds = cp.random.choice(range(len(vocab)), size=batch_size)
-    words = [vocab[int(inds[i])] for i in range(batch_size)]
-    word_batch, wp_idx = load_test_batch(words)
-    stimulus = perceive_to_get_stimulus(word_batch, Phi)
+    from tqdm import tqdm
+    for i in tqdm(range(num_batches)):
+        inds = cp.random.choice(range(len(vocab)), size=batch_size)
+        words = [vocab[int(inds[i])] for i in range(batch_size)]
+        word_batch, wp_idx = load_test_batch(words)
+        stimulus = perceive_to_get_stimulus(word_batch, Phi)
+        activ = stimulate(stimulus)
+
+import timeit
+t_cpu = timeit.timeit(lambda: runit("CPU"), number=1)
+t_gpu = timeit.timeit(lambda: runit("GPU"), number=1)
+t_cpu = timeit.timeit(lambda: runit("CPU"), number=1)
+print('GPU runtime: %f' % t_gpu)
+print('CPU runtime: %f' % t_cpu)
+
 
 
 
