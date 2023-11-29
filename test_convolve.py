@@ -7,6 +7,8 @@ import timeit
 side_len = 100
 neuron_shape = (256, side_len, side_len)
 num_samples = int(1e2)
+print('neuron shape:', neuron_shape, '\nnum samples:', num_samples)
+
 
 # Generate Data on CPU
 exc_decay = np.ones(neuron_shape)
